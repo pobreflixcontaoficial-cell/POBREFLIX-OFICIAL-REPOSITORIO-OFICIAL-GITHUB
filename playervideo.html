@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <title>Player de vídeo</title>
+  <style>
+    :root{color-scheme:dark;--red:#e50914;--white:#f7f7f7;--muted:#aaa;--panel:#171717;--line:#393939}
+    *{box-sizing:border-box}
+    html,body{width:100%;height:100%;margin:0;background:#050505;color:var(--white);font-family:Arial,Helvetica,sans-serif}
+    body{overflow:hidden}
+    button,input{font:inherit}
+    button{color:inherit}
+    .player-shell{position:relative;width:100%;height:100%;min-height:320px;background:#050505;overflow:hidden;isolation:isolate}
+    .video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#050505}
+    .scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,#000b 0%,transparent 22%,transparent 66%,#000c 100%);opacity:1;transition:opacity .25s}
+    .topbar{position:absolute;z-index:5;left:0;right:0;top:0;min-height:70px;padding:16px 22px;display:flex;align-items:flex-start;gap:18px;transition:opacity .22s}
+    .icon-btn{width:40px;height:40px;display:grid;place-items:center;flex:0 0 auto;border:0;border-radius:50%;background:transparent;color:#eee;cursor:pointer;transition:background .18s,transform .18s}
+    .icon-btn:hover{background:#ffffff1a;transform:scale(1.06)}
+    .icon-btn svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .back-btn{margin-left:-8px}
+    .title-block{min-width:0;padding-top:1px}
+    .eyebrow{font-size:10px;line-height:1.4;text-transform:uppercase;color:#c8c8c8;letter-spacing:.9px;margin-bottom:2px}
+    .episode-title{font-size:16px;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .episode-subtitle{font-size:12px;color:#c3c3c3;margin-top:3px}
+    .top-spacer{flex:1}
+    .cast-btn{margin-top:-2px}
+    .center-controls{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;gap:clamp(45px,15vw,180px);transition:opacity .2s}
+    .center-btn{position:relative;width:60px;height:60px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:#f7f7f7;filter:drop-shadow(0 2px 8px #0008);transition:transform .15s,opacity .15s}
+    .center-btn:hover{transform:scale(1.12)}
+    .center-btn svg{width:44px;height:44px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+    .center-btn.play-main{width:72px;height:72px}
+    .center-btn.play-main svg{width:59px;height:59px;fill:#f7f7f7;stroke:none}
+    .skip-count{position:absolute;left:0;right:0;top:27px;font-size:12px;font-weight:700;text-align:center}
+    .brightness{position:absolute;z-index:4;left:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:9px;opacity:0;transition:opacity .2s}
+    .player-shell:hover .brightness,.brightness:focus-within{opacity:1}
+    .brightness svg{width:19px;height:19px;fill:none;stroke:#eee;stroke-width:1.6;stroke-linecap:round}
+    .brightness input{appearance:none;writing-mode:vertical-lr;direction:rtl;width:6px;height:104px;background:linear-gradient(to top,#eee 0 75%,#777 75% 100%);border-radius:99px;cursor:pointer;outline:none}
+    .brightness input::-webkit-slider-thumb{appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid #aaa}
+    .brightness input::-moz-range-thumb{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #aaa}
+    .bottom-controls{position:absolute;z-index:5;left:0;right:0;bottom:0;padding:0 20px max(14px,env(safe-area-inset-bottom));background:linear-gradient(transparent,#050505d9 34%);transition:opacity .22s}
+    .timeline-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:14px}
+    .timeline{appearance:none;width:100%;height:4px;margin:0;outline:none;background:linear-gradient(to right,var(--red) 0%,var(--red) 0%,#575757 0%,#575757 100%);cursor:pointer;transition:height .15s}
+    .timeline:hover{height:6px}
+    .timeline::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:var(--red);border:0;box-shadow:0 0 0 3px #e5091426}
+    .timeline::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--red);border:0}
+    .time-label{font-size:12px;color:#eee;text-shadow:0 1px 4px #000;white-space:nowrap}
+    .utility-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px clamp(8px,2.2vw,28px);max-width:1000px;margin:0 auto;padding-top:16px}
+    .utility-btn{display:flex;flex:0 1 auto;align-items:center;justify-content:center;gap:8px;min-height:34px;padding:5px 8px;background:transparent;border:0;border-radius:4px;color:#ddd;font-size:12px;white-space:nowrap;cursor:pointer;transition:background .15s,color .15s}
+    .utility-btn:hover{background:#ffffff17;color:#fff}
+    .utility-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+    .utility-btn .solid{fill:currentColor;stroke:none}
+    .toast{position:absolute;z-index:10;left:50%;bottom:86px;transform:translate(-50%,10px);padding:10px 15px;border:1px solid #ffffff25;border-radius:7px;background:#171717ed;color:#eee;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .popover{position:absolute;z-index:20;bottom:104px;min-width:210px;max-width:min(420px,calc(100vw - 24px));max-height:min(52vh,420px);overflow:auto;padding:14px;background:#171717f5;border:1px solid #ffffff24;border-radius:8px;box-shadow:0 12px 40px #000b;display:none}
+    .popover.open{display:block;animation:appear .15s ease-out}.side-panel{top:0;left:0;right:auto;bottom:0;width:min(440px,92vw);max-width:none;height:100%;max-height:none;padding:22px 18px 24px;border:0;border-right:1px solid #ffffff18;border-radius:0;background:linear-gradient(145deg,#191919f7,#0d0d0df7);box-shadow:18px 0 55px #000b;overflow:auto}.side-panel.open{animation:sidePanelIn .22s ease-out}@keyframes sidePanelIn{from{opacity:0;transform:translateX(-25px)}to{opacity:1;transform:translateX(0)}}.side-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:17px;border-bottom:1px solid #ffffff14}.side-panel-head h3{margin:3px 0 0;font-size:24px;letter-spacing:-.3px}.side-panel-kicker{color:#e50914;font-size:10px;font-weight:800;letter-spacing:1.1px}.side-panel-subtitle{padding:13px 0 7px;color:#929292;font-size:12px;line-height:1.45}.side-panel-close{width:32px;height:32px;border:1px solid #ffffff22;border-radius:50%;background:#ffffff0a;color:#ddd;font-size:22px;line-height:1;cursor:pointer}.side-panel-close:hover{background:#e50914;color:#fff}.side-panel .option-list{gap:7px}.season-list .option{justify-content:flex-start;padding:14px;border:1px solid #ffffff0e;background:#ffffff06;font-size:14px;font-weight:700}.season-list .option:before{content:'S';display:grid;place-items:center;width:30px;height:30px;border-radius:7px;background:#292929;color:#aaa;font-size:12px}.season-list .option.selected{background:#e50914;border-color:#ff4a52}.season-list .option.selected:before{background:#fff;color:#e50914}.episode-list{padding-top:4px}.episode-card{width:100%;display:grid;grid-template-columns:28px 92px minmax(0,1fr);gap:10px;align-items:center;padding:10px;border:1px solid transparent;border-radius:8px;background:transparent;color:#eee;text-align:left;cursor:pointer}.episode-card:hover{background:#ffffff0b;border-color:#ffffff16}.episode-card.selected{background:#2b2b2b;border-color:#ffffff12}.episode-number{color:#888;font-size:15px;text-align:center;font-weight:700}.episode-card.selected .episode-number{color:#e50914}.episode-thumb{width:92px;height:58px;object-fit:cover;border-radius:4px;background:#292929}.episode-info{min-width:0}.episode-title-line{display:flex;align-items:center;justify-content:space-between;gap:7px;font-size:13px;font-weight:700}.episode-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.episode-duration{color:#aaa;font-size:10px;font-weight:400;white-space:nowrap}.episode-description{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:5px;color:#999;font-size:10px;line-height:1.35}
+    @keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    .popover.speed{left:4%}.popover.seasons{left:22%}.popover.episodes{left:50%;transform:translateX(-50%)}.popover.sources{left:50%;width:min(520px,calc(100vw - 24px));transform:translateX(-50%)}.popover.audio{right:4%}.popover.catalog-picker{left:50%;top:76px;bottom:auto;width:min(680px,calc(100vw - 24px));max-height:min(70vh,560px);transform:translateX(-50%)}.catalog-picker-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.catalog-picker-head h3{margin:0}.catalog-picker-close{border:0;background:transparent;color:#aaa;font-size:20px;cursor:pointer}.catalog-search{width:100%;padding:10px 12px;border:1px solid #444;border-radius:8px;background:#0e0e0e;color:#fff;outline:none}.catalog-search:focus{border-color:#e50914;box-shadow:0 0 0 2px #e5091433}.catalog-filter-section>strong{display:block;color:#888;font-size:10px;text-transform:uppercase;letter-spacing:.7px;margin-top:8px}.catalog-filter-row{display:flex;gap:7px;overflow:auto;padding:10px 0}.catalog-filter{border:1px solid #444;border-radius:999px;background:#202020;color:#bbb;padding:6px 11px;font-size:11px;cursor:pointer;white-space:nowrap}.catalog-filter.active,.catalog-filter:hover{background:#e50914;border-color:#e50914;color:#fff}.catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px}.catalog-item{min-width:0;padding:0;border:1px solid #333;border-radius:8px;background:#202020;color:#fff;text-align:left;overflow:hidden;cursor:pointer;transition:transform .16s,border-color .16s,background .16s}.catalog-item:hover,.catalog-item.selected{transform:translateY(-2px);border-color:#e50914;background:#2b1518}.catalog-item img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;background:#111}.catalog-item-copy{padding:8px}.catalog-item-title{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:700}.catalog-item-meta{display:block;margin-top:4px;color:#aaa;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.catalog-empty{padding:25px 8px;color:#aaa;text-align:center;font-size:12px}.catalog-loading{padding:25px 8px;color:#ddd;text-align:center;font-size:12px}
+    .popover h3{font-size:14px;margin:0 0 10px}.option-list{display:grid;gap:4px}.option{width:100%;padding:9px 10px;display:flex;justify-content:space-between;align-items:center;text-align:left;background:transparent;border:0;border-radius:5px;color:#ddd;font-size:13px;cursor:pointer}.option:hover,.option.selected{background:#ffffff16;color:#fff}.option.selected:after{content:'';background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12 4 4L19 6' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;color:#fff}
+    .locked .topbar,.locked .bottom-controls,.locked .brightness{opacity:0!important;pointer-events:none!important}
+    .locked .center-controls .skip-control,.locked .center-controls .play-main{opacity:.12;pointer-events:none}
+    .locked .scrim{opacity:0}
+    .lock-overlay{position:absolute;z-index:30;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
+    .locked .lock-overlay{display:flex}
+    .unlock-button{pointer-events:auto;display:flex;align-items:center;gap:9px;padding:12px 17px;border:1px solid #ffffff55;border-radius:999px;background:#111e;color:#fff;box-shadow:0 5px 22px #0009;cursor:pointer;font-size:13px;font-weight:700;backdrop-filter:blur(6px)}
+    .unlock-button:hover,.unlock-button:focus-visible{background:#e50914;border-color:#fff;outline:2px solid #fff4;outline-offset:2px}
+    .unlock-button svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .player-shell.controls-hidden .topbar,.player-shell.controls-hidden .bottom-controls,.player-shell.controls-hidden .brightness,.player-shell.controls-hidden .scrim{opacity:0;pointer-events:none}
+    .player-shell.controls-hidden{cursor:none}.player-shell.no-source .center-controls,.player-shell.no-source .bottom-controls,.player-shell.no-source .brightness{display:none!important}
+
+    .intro-layer{position:absolute;inset:0;z-index:20;background:#000;display:none;place-items:center;overflow:hidden}
+    .intro-layer.active{display:grid}
+    .intro-video{width:100%;height:100%;object-fit:contain;background:#000}
+    .intro-skip{position:absolute;right:24px;bottom:24px;border:1px solid #ffffff88;border-radius:4px;background:#111d;color:#fff;padding:11px 16px;font-size:13px;font-weight:700;cursor:pointer}
+    .intro-skip:hover{background:#fff;color:#111}
+    .intro-label{position:absolute;left:24px;bottom:27px;color:#ddd;font-size:12px;letter-spacing:.7px;text-transform:uppercase;text-shadow:0 1px 5px #000}
+    .unsupported{position:absolute;z-index:2;inset:0;display:none;place-items:center;text-align:center;padding:30px;color:#bbb;pointer-events:none}
+    .unsupported.show{display:grid}
+    .unsupported-card{max-width:440px;padding:23px;border:1px solid #ffffff18;border-radius:9px;background:#080808a8;line-height:1.55}
+    .unsupported-card strong{display:block;color:#eee;margin-bottom:8px;font-size:15px}
+    @media(max-width:650px){.popover{bottom:98px;max-height:58vh}.popover.speed,.popover.seasons,.popover.episodes,.popover.sources{left:50%;right:auto;transform:translateX(-50%);width:min(460px,calc(100vw - 24px));}.popover.side-panel{left:0!important;right:auto;top:0;bottom:0;transform:none!important;width:min(440px,92vw);max-height:none;height:100%;}.popover.audio{left:50%;right:auto;transform:translateX(-50%);width:min(360px,calc(100vw - 24px))}.popover.catalog-picker{top:64px;bottom:auto;width:min(680px,calc(100vw - 16px));max-height:calc(100vh - 84px)}.topbar{padding:12px 12px;gap:9px;min-height:60px}.episode-title{font-size:14px}.episode-subtitle{font-size:11px}.center-controls{gap:clamp(25px,9vw,60px)}.center-btn{width:48px;height:48px}.center-btn svg{width:38px;height:38px}.center-btn.play-main{width:62px;height:62px}.center-btn.play-main svg{width:50px;height:50px}.brightness{left:10px}.brightness input{height:82px}.bottom-controls{padding-left:12px;padding-right:12px}.utility-row{justify-content:center;gap:3px 5px;padding-top:12px}.utility-btn{gap:5px;padding:5px 4px;font-size:10px}.utility-btn svg{width:16px;height:16px}.time-label{font-size:11px}}
+    @media(max-width:390px){.utility-row{gap:2px}.utility-btn{font-size:9px;min-height:30px}.utility-btn svg{width:14px;height:14px}.episode-title{max-width:180px}.skip-control{transform:scale(.88)}}
+  </style>
+<style>.pf-icon{display:inline-block;width:16px;height:16px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.page-flow .pf-icon,.shortcut .pf-icon{margin:0 4px}</style>
+<style data-reduced-motion="true">@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}</style>
+</head>
+<body>
+  <main class="player-shell" id="playerShell" aria-label="Player de vídeo">
+    <video class="video" id="video" playsinline preload="metadata" aria-label="Vídeo em reprodução"></video>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="lock-overlay" id="lockOverlay" aria-live="polite"><button class="unlock-button" id="unlockButton" type="button" aria-label="Desbloquear controles"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0"/></svg><span>Desbloquear controles</span></button></div>
+    <section class="intro-layer" id="introLayer" aria-label="Intro Pobreflix">
+      <video class="intro-video" id="introVideo" playsinline preload="auto" aria-label="Intro Pobreflix"></video>
+      <span class="intro-label">POBREFLIX · INTRO</span>
+      <button class="intro-skip" id="skipIntro" type="button">Pular intro</button>
+    </section>
+
+    <header class="topbar">
+      <button class="icon-btn back-btn" id="backButton" aria-label="Voltar" title="Voltar">
+        <svg viewBox="0 0 24 24"><path d="m14.5 5-7 7 7 7M8 12h12"/></svg>
+      </button>
+      <div class="title-block"><div class="eyebrow" id="seriesTitle">POBREFLIX · SÉRIE</div><div class="episode-title" id="episodeTitle">S1:E2 “O próximo capítulo”</div><div class="episode-subtitle" id="episodeSubtitle">Temporada 1 · Episódio 2</div></div>
+      <div class="top-spacer"></div>
+      <button class="icon-btn catalog-button" id="catalogButton" aria-label="Escolher outro filme ou série" title="Escolher outro conteúdo">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5m8-5v5M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg>
+      </button>
+      <button class="icon-btn cast-btn" id="castButton" aria-label="Transmitir para dispositivo" title="Transmitir">
+        <svg viewBox="0 0 24 24"><path d="M4 19h.01M4 15a5 5 0 0 1 5 5M4 10a10 10 0 0 1 10 10M3 4h18v13h-6"/><path d="M18 8v5m-2.5-2.5L18 8l2.5 2.5"/></svg>
+      </button>
+    </header>
+
+    <div class="brightness" aria-label="Brilho da tela">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+      <input id="brightnessControl" aria-label="Ajustar brilho" type="range" min="35" max="100" value="82">
+    </div>
+
+    <section class="unsupported" id="emptyState" aria-live="polite"><div class="unsupported-card"><strong>Fonte de mídia não conectada</strong>Este título ainda não tem uma fonte de reprodução autorizada cadastrada. O player não substituirá o filme por um vídeo de demonstração.</div></section>
+
+    <div class="center-controls" id="centerControls">
+      <button class="center-btn skip-control" id="rewindButton" aria-label="Voltar 10 segundos" title="Voltar 10 segundos">
+        <svg viewBox="0 0 48 48"><path d="M15 12 8 6m0 0v9m0-9h9M10 25a14 14 0 1 0 4-10"/><path d="M24 18v12m0-12-3 2"/></svg><span class="skip-count">10</span>
+      </button>
+      <button class="center-btn play-main" id="playButton" aria-label="Reproduzir" title="Reproduzir (espaço)">
+        <svg id="playIcon" viewBox="0 0 60 60"><path d="M18 10 50 30 18 50z"/></svg>
+      </button>
+      <button class="center-btn skip-control" id="forwardButton" aria-label="Avançar 10 segundos" title="Avançar 10 segundos">
+        <svg viewBox="0 0 48 48"><path d="m33 12 7-6m0 0v9m0-9h-9m9 19a14 14 0 1 1-4-10"/><path d="M24 18v12m0-12-3 2"/></svg><span class="skip-count">10</span>
+      </button>
+    </div>
+
+    <section class="popover catalog-picker" id="catalogPicker" aria-label="Escolher outro filme ou série">
+      <div class="catalog-picker-head"><h3>Escolha outro conteúdo</h3><button class="catalog-picker-close" id="catalogPickerClose" type="button" aria-label="Fechar catálogo">×</button></div>
+      <input class="catalog-search" id="catalogSearch" type="search" placeholder="Buscar filme ou série…" autocomplete="off">
+      <div class="catalog-filter-section"><strong>Tipos</strong><div class="catalog-filter-row" id="catalogTypeFilters" role="tablist" aria-label="Filtrar tipos de conteúdo"><button class="catalog-filter active" type="button" data-catalog-type="all">Todos</button></div></div><div class="catalog-filter-section"><strong>Categorias</strong><div class="catalog-filter-row" id="catalogCategoryFilters" role="tablist" aria-label="Filtrar categorias"><button class="catalog-filter active" type="button" data-catalog-category="all">Todas</button></div></div>
+      <div class="catalog-grid" id="catalogGrid"><div class="catalog-loading">Carregando catálogo…</div></div>
+    </section>
+    <footer class="bottom-controls" id="bottomControls">
+      <div class="timeline-row"><input class="timeline" id="timeline" type="range" min="0" max="1000" value="0" aria-label="Progresso do vídeo"><span class="time-label" id="timeLabel">0:00</span></div>
+      <div class="utility-row">
+        <button class="utility-btn" id="speedButton" aria-label="Velocidade de reprodução">
+          <svg viewBox="0 0 24 24"><path d="M4.8 18a9 9 0 1 1 14.4 0M12 12l4-4M12 18h.01"/></svg><span>Velocidade <span id="speedLabel">1x</span></span>
+        </button>
+        <button class="utility-btn" id="lockButton" aria-label="Bloquear controles">
+          <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg><span id="lockLabel">Bloquear</span>
+        </button>
+        <button class="utility-btn" id="seasonsButton" aria-label="Escolher temporada">
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="5" rx="1"/><rect x="4" y="10" width="16" height="5" rx="1"/><rect x="4" y="16" width="16" height="4" rx="1"/></svg><span>Temporadas</span>
+        </button>
+        <button class="utility-btn" id="episodesButton" aria-label="Abrir episódios">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM7 4h16v13M1 10v13h16"/><path d="m10 11 5 3-5 3z" class="solid"/></svg><span>Episódios</span>
+        </button>
+        <button class="utility-btn" id="sourcesButton" aria-label="Escolher servidor e player"><span aria-hidden="true">▣</span><span>Servidores</span></button>
+        <button class="utility-btn" id="audioButton" aria-label="Áudio e legendas">
+          <svg viewBox="0 0 24 24"><path d="M3 5h18v12H9l-5 4v-4H3z"/><path d="M7 9h10M7 13h6"/></svg><span>Áudio e legendas</span>
+        </button>
+        <button class="utility-btn" id="nextButton" aria-label="Próximo episódio">
+          <svg viewBox="0 0 24 24"><path d="M5 4v16l12-8z" class="solid"/><path d="M20 5v14"/></svg><span>Próximo</span>
+        </button>
+      </div>
+    </footer>
+
+    <section class="popover speed" id="speedPopover" aria-label="Velocidade de reprodução"><h3>Velocidade</h3><div class="option-list" id="speedOptions"></div></section>
+    <section class="popover seasons side-panel" id="seasonsPopover" aria-label="Temporadas"><div class="side-panel-head"><div><span class="side-panel-kicker">POBREFLIX</span><h3>Temporadas</h3></div><button class="side-panel-close" type="button" data-close-popover="seasonsPopover" aria-label="Fechar temporadas">×</button></div><div class="side-panel-subtitle">Escolha uma temporada para ver os episódios disponíveis.</div><div class="option-list season-list" id="seasonOptions"></div></section>
+    <section class="popover episodes side-panel" id="episodesPopover" aria-label="Episódios"><div class="side-panel-head"><div><span class="side-panel-kicker">TEMPORADA <span id="episodePanelSeason">1</span></span><h3>Episódios</h3></div><button class="side-panel-close" type="button" data-close-popover="episodesPopover" aria-label="Fechar episódios">×</button></div><div class="side-panel-subtitle">Selecione um episódio para continuar assistindo.</div><div class="option-list episode-list" id="episodeOptions"></div></section>
+    <section class="popover sources side-panel" id="sourcesPopover" aria-label="Servidores e players"><div class="side-panel-head"><div><span class="side-panel-kicker">POBREFLIX · ROTAS</span><h3>Servidor e player</h3></div><button class="side-panel-close" type="button" data-close-popover="sourcesPopover" aria-label="Fechar servidores">×</button></div><div class="server-intro"><span class="server-intro-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M9 5h10v10"/></svg></span><div><strong>Escolha onde assistir</strong><p class="source-help">Cada rota combina servidor, player, áudio e legenda.</p></div></div><div class="source-filters"><select id="playerVoiceFilter" aria-label="Filtrar idioma da voz"><option value="all">Todas as vozes</option><option value="original">Original</option><option value="pt-BR">Português</option><option value="en-US">Inglês</option><option value="es-ES">Espanhol</option><option value="ja-JP">Japonês</option><option value="ko-KR">Coreano</option></select><select id="playerSubtitleFilter" aria-label="Filtrar idioma da legenda"><option value="all">Todas as legendas</option><option value="none">Sem legenda</option><option value="pt-BR">Português</option><option value="en-US">Inglês</option><option value="es-ES">Espanhol</option><option value="ja-JP">Japonês</option></select></div><div class="option-list" id="sourceOptions"><button class="option selected" disabled>Nenhuma fonte de mídia cadastrada</button></div></section>
+    <section class="popover audio" id="audioPopover" aria-label="Áudio e legendas"><h3>Áudio</h3><div class="option-list" id="audioOptions"><button class="option selected" data-audio="Português original">Português original</button><button class="option" data-audio="Inglês">Inglês</button></div><h3 style="margin-top:14px">Legendas</h3><div class="option-list" id="subtitleOptions"><button class="option selected" data-subtitle="Desativadas">Desativadas</button><button class="option" data-subtitle="Português">Português</button><button class="option" data-subtitle="Inglês">Inglês</button></div></section>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <style>.source-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.source-filters select{width:100%;padding:8px;border:1px solid #444;border-radius:7px;background:#171717;color:#fff}.source-help{color:#aaa;font-size:12px;margin:0}.server-intro{display:flex;gap:10px;align-items:center;margin:15px 0;padding:12px;border:1px solid #ffffff14;border-radius:10px;background:linear-gradient(100deg,#e5091422,#ffffff05)}.server-intro strong{display:block;font-size:12px}.server-intro-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:#e50914;color:#fff}.server-intro-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.source-card{width:100%;display:block;padding:13px;text-align:left;border:1px solid #ffffff12;border-radius:10px;background:#ffffff06;color:#fff;cursor:pointer;transition:transform .16s,border-color .16s,background .16s;position:relative}.source-card:hover{transform:translateX(-2px);border-color:#e50914;background:#e5091418}.source-card.selected{border-color:#e50914;background:linear-gradient(105deg,#e509142b,#ffffff08);box-shadow:0 0 0 1px #e5091444}.source-card.selected:after{content:"";background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12 4 4L19 6' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;position:absolute;top:12px;right:12px;display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#e50914;color:#fff;font-size:12px}.source-card-top{display:flex;align-items:center;gap:8px;padding-right:28px}.source-server-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px #4ade8030}.source-server-name{font-size:14px;font-weight:800}.source-player-name{margin-top:4px;color:#aaa;font-size:11px}.source-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}.source-badge{padding:4px 7px;border-radius:999px;background:#ffffff0f;color:#cfcfcf;font-size:10px}.source-badge.voice{color:#ffb5c6;background:#e5091425}.source-badge.subtitle{color:#b9d9ff;background:#2b5f9133}.source-default{position:absolute;top:13px;right:40px;color:#f6c453;font-size:9px;text-transform:uppercase;letter-spacing:.5px}</style>
+  <script>
+    (()=>{
+      const q=new URLSearchParams(location.search);
+      const $=s=>document.querySelector(s);
+      const video=$('#video'),shell=$('#playerShell'),toastEl=$('#toast'),introLayer=$('#introLayer'),introVideo=$('#introVideo');
+      const title=q.get('title')||'Conteúdo não selecionado';
+      const type=q.get('type')||((q.has('season')||q.has('episode'))?'series':'movie');
+      const isSeries=/series|série|serie/i.test(type);
+      const hasEpisodeContext=isSeries&&(q.has('season')||q.has('episode'));
+      const series=q.get('series')||(isSeries?'POBREFLIX · SÉRIE':'POBREFLIX · FILME');
+      const season=Number(q.get('season')||1),episode=Number(q.get('episode')||1);
+      const demoContext=q.get('demo')==='1'; $('#seriesTitle').textContent=series; $('#episodeTitle').textContent=title; $('#episodeSubtitle').textContent=hasEpisodeContext?`${demoContext?'Demonstração · ':''}Temporada ${season} · Episódio ${episode}`:(isSeries?'Série · episódios não cadastrados':demoContext?'Filme · demonstração':'Filme');
+      ['seasonsButton','episodesButton','nextButton'].forEach(id=>{const control=document.getElementById(id);if(control)control.hidden=!hasEpisodeContext;});
+      const src=q.get('video')||'',empty=$('#emptyState'); let currentSource=src; let remoteSources=[]; let catalogItems=[]; let catalogTypeFilter='all'; let catalogCategoryFilter='all'; let catalogSearch=''; let currentContentId=q.get('db')||''; let toastTimer,hideTimer,locked=false,seeking=false,speed=1; let currentSeason=season,currentEpisode=episode; let introPlayed=false,introEnded=false;
+      const INTRO_SRC='assets/video/pobreflix-intro.mp4';
+      function selectSource(source, announce=true){currentSource=source?.video_url||source||'';introPlayed=false;introEnded=false;if(currentSource){video.src=currentSource;video.load();empty.classList.remove('show');shell.classList.remove('no-source')}else{video.pause();video.removeAttribute('src');video.load();empty.classList.add('show');shell.classList.add('no-source')};document.querySelectorAll('#sourceOptions .option, #sourceOptions .source-card').forEach(button=>button.classList.toggle('selected',button.dataset.sourceId===source?.id));video.querySelectorAll('track[data-pobreflix-subtitle]').forEach(track=>track.remove());if(source?.subtitle_url&&source.subtitle_language&&source.subtitle_language!=='none'){const track=document.createElement('track');track.dataset.pobreflixSubtitle='true';track.kind='subtitles';track.src=source.subtitle_url;track.srclang=source.subtitle_language;track.label=source.subtitleLanguage||source.subtitle_language;track.default=true;video.appendChild(track);}if(announce)toast(`Fonte selecionada: ${source?.label||source?.playerName||'URL'}`)} if(currentSource){video.src=currentSource;video.load();empty.classList.remove('show');shell.classList.remove('no-source')} else {empty.classList.add('show');shell.classList.add('no-source')};
+      const format=t=>{if(!Number.isFinite(t)||t<0)t=0;const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=Math.floor(t%60);return h?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`};
+      function toast(message){toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1900)}
+      function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+      function contentKind(item){const raw=String(item.content_type||item.type||item.format||'').toLowerCase().trim();if(raw)return raw.replace('série','series').replace('filme','movie');const text=`${item.genre||''}`.toLowerCase();return /série|serie|series|season|temporada/.test(text)?'series':'movie'}
+      const typeLabels={movie:'Filme',series:'Série',anime:'Anime',documentary:'Documentário',short:'Curta',live:'Ao vivo'}; const contentTypeLabel=type=>typeLabels[type]||String(type||'Outro').replace(/^./,c=>c.toUpperCase());
+      function splitCategories(item){return String(item.genre||'').split(/[•,|/]/).map(value=>value.trim()).filter(Boolean)}
+      function applyContent(item,announce=true){
+        if(!item)return;
+        currentContentId=item.id||''; currentSource=item.video_url||''; remoteSources=[];
+        const kind=contentKind(item),isSeries=kind==='series'; $('#seriesTitle').textContent=isSeries?(item.title||'POBREFLIX · SÉRIE'):'POBREFLIX · FILME'; $('#episodeTitle').textContent=item.title||'Conteúdo selecionado'; $('#episodeSubtitle').textContent=isSeries?'Série · episódios não cadastrados':'Filme'; ['seasonsButton','episodesButton','nextButton'].forEach(id=>{const control=document.getElementById(id);if(control)control.hidden=true;});
+        if(currentSource){video.src=currentSource;video.load();empty.classList.remove('show');shell.classList.remove('no-source')}else{video.pause();video.removeAttribute('src');video.load();empty.classList.add('show');shell.classList.add('no-source')} introPlayed=false; introEnded=false;
+        document.title=`${item.title||'Player'} — Pobreflix`;
+        if(announce)toast(`${item.title||'Conteúdo'} selecionado`);
+        loadContentSources(window.pobreflix?.client,item);
+      }
+      async function loadContentSources(client,item){
+        if(!client||!item?.id||!/^[0-9a-f-]{36}$/i.test(item.id))return;
+        const result=await client.from('title_sources').select('id,label,video_url,is_default,sort_order,player_id,audio_language,voice_name,subtitle_language,subtitle_url,video_players(name,player_type,voice_language,voice_name,media_servers(name))').eq('title_id',item.id).eq('active',true).order('sort_order',{ascending:true});
+        if(result.error||!result.data?.length)return;
+        remoteSources=result.data.map(source=>({...source,playerName:source.video_players?.name||'Player',playerType:source.video_players?.player_type||'direct',serverName:source.video_players?.media_servers?.name||'Servidor',audioLanguage:source.audio_language||source.video_players?.voice_language||'original',voiceName:source.voice_name||source.video_players?.voice_name||'',subtitleLanguage:source.subtitle_language||'none'}));
+        const preferred=remoteSources.find(source=>source.is_default)||remoteSources[0]; selectSource(preferred,false); renderSourceOptions();
+      }
+      function renderCatalog(){
+        const grid=$('#catalogGrid'); if(!grid)return; const query=catalogSearch.trim().toLocaleLowerCase('pt-BR');
+        const types=[...new Set(catalogItems.map(contentKind))].sort(); const categories=[...new Set(catalogItems.flatMap(splitCategories))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+        const typeFilters=$('#catalogTypeFilters'), categoryFilters=$('#catalogCategoryFilters');
+        if(typeFilters) typeFilters.innerHTML=`<button class="catalog-filter ${catalogTypeFilter==='all'?'active':''}" type="button" data-catalog-type="all">Todos</button>`+types.map(type=>`<button class="catalog-filter ${catalogTypeFilter===type?'active':''}" type="button" data-catalog-type="${escapeHtml(type)}">${escapeHtml(contentTypeLabel(type))}</button>`).join('');
+        if(categoryFilters) categoryFilters.innerHTML=`<button class="catalog-filter ${catalogCategoryFilter==='all'?'active':''}" type="button" data-catalog-category="all">Todas</button>`+categories.map(category=>`<button class="catalog-filter ${catalogCategoryFilter===category?'active':''}" type="button" data-catalog-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`).join('');
+        const filtered=catalogItems.filter(item=>{const kind=contentKind(item), itemCategories=splitCategories(item);const matchesType=catalogTypeFilter==='all'||kind===catalogTypeFilter;const matchesCategory=catalogCategoryFilter==='all'||itemCategories.includes(catalogCategoryFilter);const haystack=`${item.title||''} ${item.genre||''} ${item.description||''}`.toLocaleLowerCase('pt-BR');return matchesType&&matchesCategory&&(!query||haystack.includes(query));});
+        if(!filtered.length){grid.innerHTML='<div class="catalog-empty">Nenhum conteúdo encontrado para os filtros escolhidos.</div>';return;}
+        grid.innerHTML=filtered.map(item=>`<button class="catalog-item ${String(item.id)===String(currentContentId)?'selected':''}" type="button" data-catalog-id="${escapeHtml(item.id)}"><img src="${escapeHtml(item.poster_url||'assets/cards/card-1.jpg')}" alt="${escapeHtml(item.title)}" loading="lazy"><span class="catalog-item-copy"><span class="catalog-item-title">${escapeHtml(item.title)}</span><span class="catalog-item-meta">${escapeHtml(item.genre||'Sem categoria')} · ${escapeHtml(contentTypeLabel(contentKind(item)))}</span></span></button>`).join('');
+      }
+      async function loadCatalog(client){
+        const grid=$('#catalogGrid'); if(!grid)return;
+        if(!client){grid.innerHTML='<div class="catalog-empty">Catálogo conectado indisponível. Use o menu Catálogo para configurar os conteúdos.</div>';return;}
+        const result=await client.from('titles').select('id,title,description,poster_url,banner_url,genre,content_type,video_url,published').eq('published',true).order('created_at',{ascending:false}).limit(100);
+        if(result.error){grid.innerHTML='<div class="catalog-empty">Não foi possível carregar o catálogo agora.</div>';return;}
+        catalogItems=result.data||[]; renderCatalog();
+      }
+      function openCatalog(){togglePopover('catalogPicker');if($('#catalogPicker').classList.contains('open')){if(window.pobreflix?.client)loadCatalog(window.pobreflix.client);else $('#catalogGrid').innerHTML='<div class="catalog-loading">Conectando ao catálogo…</div>';}}
+      function renderSourceOptions(){
+        const options=$('#sourceOptions'); if(!options)return;
+        const voice=$('#playerVoiceFilter')?.value||'all', subtitle=$('#playerSubtitleFilter')?.value||'all';
+        const filtered=remoteSources.filter(source=>(voice==='all'||source.audioLanguage===voice)&&(subtitle==='all'||source.subtitleLanguage===subtitle));
+        options.innerHTML=filtered.length?filtered.map(source=>`<button class="source-card ${source.is_default?'selected':''}" data-source-id="${escapeHtml(source.id)}"><span class="source-card-top"><span class="source-server-dot"></span><span class="source-server-name">${escapeHtml(source.serverName)}</span></span>${source.is_default?'<span class="source-default">Principal</span>':''}<span class="source-player-name">${escapeHtml(source.playerName)} · ${escapeHtml(source.playerType||'direct')}</span><span class="source-badges"><span class="source-badge voice">Áudio: ${escapeHtml(source.audioLanguage||'original')}</span>${source.voiceName?`<span class="source-badge">${escapeHtml(source.voiceName)}</span>`:''}<span class="source-badge subtitle">Legenda: ${escapeHtml(source.subtitleLanguage||'none')}</span></span></button>`).join(''):'<span class="source-help">Nenhuma fonte para estes idiomas.</span>';
+      }
+      async function loadRemoteSources(client){
+        const titleId=q.get('db'); if(!client||!titleId||!/^[0-9a-f-]{36}$/i.test(titleId))return;
+        const result=await client.from('title_sources').select('id,label,video_url,is_default,sort_order,player_id,audio_language,voice_name,subtitle_language,subtitle_url,video_players(name,player_type,voice_language,voice_name,media_servers(name))').eq('title_id',titleId).eq('active',true).order('sort_order',{ascending:true});
+        if(result.error||!result.data?.length)return;
+        remoteSources=result.data.map(source=>({...source,playerName:source.video_players?.name||'Player',playerType:source.video_players?.player_type||'direct',serverName:source.video_players?.media_servers?.name||'Servidor',audioLanguage:source.audio_language||source.video_players?.voice_language||'original',voiceName:source.voice_name||source.video_players?.voice_name||'',subtitleLanguage:source.subtitle_language||'none'}));
+        const options=$('#sourceOptions'); const renderSourceOptions=()=>{const voice=$('#playerVoiceFilter').value, subtitle=$('#playerSubtitleFilter').value; const filtered=remoteSources.filter(source=>(voice==='all'||source.audioLanguage===voice)&&(subtitle==='all'||source.subtitleLanguage===subtitle)); options.innerHTML=filtered.length?filtered.map(source=>`<button class="source-card ${source.is_default?'selected':''}" data-source-id="${source.id}"><span class="source-card-top"><span class="source-server-dot"></span><span class="source-server-name">${escapeHtml(source.serverName)}</span></span>${source.is_default?'<span class="source-default">Principal</span>':''}<span class="source-player-name">${escapeHtml(source.playerName)} · ${escapeHtml(source.playerType||'direct')}</span><span class="source-badges"><span class="source-badge voice">Áudio: ${escapeHtml(source.audioLanguage||'original')}</span>${source.voiceName?`<span class="source-badge">${escapeHtml(source.voiceName)}</span>`:''}<span class="source-badge subtitle">Legenda: ${escapeHtml(source.subtitleLanguage||'none')}</span></span></button>`).join(''):'<span class="source-help">Nenhuma fonte para estes idiomas.</span>';};
+        options.onclick=event=>{const button=event.target.closest('[data-source-id]');if(button){const source=remoteSources.find(item=>item.id===button.dataset.sourceId);if(source)selectSource(source);}};
+        $('#playerVoiceFilter').onchange=renderSourceOptions; $('#playerSubtitleFilter').onchange=renderSourceOptions; renderSourceOptions();
+        const preferred=remoteSources.find(source=>source.is_default)||remoteSources[0]; selectSource(preferred,false);
+      }
+      window.addEventListener('pobreflix:ready',event=>loadRemoteSources(event.detail?.client));
+      $('#sourcesButton').addEventListener('click',()=>togglePopover('sourcesPopover'));      $('#catalogButton').addEventListener('click',openCatalog); $('#catalogPickerClose').addEventListener('click',()=>$('#catalogPicker').classList.remove('open'));
+      $('#catalogSearch').addEventListener('input',event=>{catalogSearch=event.target.value;renderCatalog()}); $('#catalogTypeFilters').addEventListener('click',event=>{const button=event.target.closest('[data-catalog-type]');if(!button)return;catalogTypeFilter=button.dataset.catalogType;renderCatalog()}); $('#catalogCategoryFilters').addEventListener('click',event=>{const button=event.target.closest('[data-catalog-category]');if(!button)return;catalogCategoryFilter=button.dataset.catalogCategory;renderCatalog()});
+      $('#catalogGrid').addEventListener('click',event=>{const button=event.target.closest('[data-catalog-id]');if(!button)return;const item=catalogItems.find(entry=>String(entry.id)===button.dataset.catalogId);if(item){applyContent(item);$('#catalogPicker').classList.remove('open');}});
+      window.addEventListener('pobreflix:ready',event=>loadCatalog(event.detail?.client));
+
+      function setPlayIcon(isPlaying){$('#playIcon').innerHTML=isPlaying?'<path d="M17 12v32h-9V12zm18 0v32h-9V12z"/>':'<path d="M18 10 50 30 18 50z"/>';$('#playButton').setAttribute('aria-label',isPlaying?'Pausar':'Reproduzir')}
+      function endIntro(reason='ended'){introEnded=true;introPlayed=true;introVideo.pause();introVideo.currentTime=0;introLayer.classList.remove('active');shell.classList.remove('controls-hidden');if(reason==='skipped')toast('Intro pulada');if(video.src) video.play().catch(()=>toast('Clique em reproduzir para iniciar o conteúdo'))}
+      function playIntro(){if(introPlayed||introEnded||!video.src)return false;introPlayed=true;introVideo.src=INTRO_SRC;introLayer.classList.add('active');introVideo.currentTime=0;introVideo.play().catch(()=>endIntro('fallback'));return true}
+      function skipIntro(){if(introLayer.classList.contains('active'))endIntro('skipped')}
+      async function togglePlay(){if(!video.src){toast('Adicione um vídeo pela URL para reproduzir');return}if(introLayer.classList.contains('active'))return;if(video.paused){if(playIntro())return;try{await video.play()}catch{toast('Não foi possível reproduzir este vídeo')}}else video.pause()}
+      $('#playButton').addEventListener('click',togglePlay); $('#skipIntro').addEventListener('click',skipIntro); introVideo.addEventListener('ended',()=>endIntro('ended')); introVideo.addEventListener('error',()=>endIntro('fallback'));
+      video.addEventListener('play',()=>setPlayIcon(true));video.addEventListener('pause',()=>setPlayIcon(false));
+      $('#rewindButton').addEventListener('click',()=>{video.currentTime=Math.max(0,(video.currentTime||0)-10);toast('Voltando 10 segundos')}); $('#forwardButton').addEventListener('click',()=>{video.currentTime=Math.min(video.duration||Infinity,(video.currentTime||0)+10);toast('Avançando 10 segundos')});
+      const timeline=$('#timeline'); video.addEventListener('timeupdate',()=>{if(!seeking&&Number.isFinite(video.duration)&&video.duration>0){timeline.value=String(Math.round(video.currentTime/video.duration*1000));timeline.style.background=`linear-gradient(to right,var(--red) 0%,var(--red) ${timeline.value/10}%,#575757 ${timeline.value/10}%,#575757 100%)`;$('#timeLabel').textContent=format(video.duration-video.currentTime)}}); video.addEventListener('loadedmetadata',()=>{empty.classList.remove('show');$('#timeLabel').textContent=format(video.duration)});
+      timeline.addEventListener('input',()=>{seeking=true;const pct=Number(timeline.value)/10;timeline.style.background=`linear-gradient(to right,var(--red) 0%,var(--red) ${pct}%,#575757 ${pct}%,#575757 100%)`;if(Number.isFinite(video.duration))$('#timeLabel').textContent=format(video.duration*Number(timeline.value)/1000)}); timeline.addEventListener('change',()=>{if(Number.isFinite(video.duration))video.currentTime=video.duration*Number(timeline.value)/1000;seeking=false});
+      const speedValues=[.5,.75,1,1.25,1.5,1.75,2]; $('#speedOptions').innerHTML=speedValues.map(x=>`<button class="option ${x===1?'selected':''}" data-speed="${x}">${x}x</button>`).join(''); $('#speedOptions').addEventListener('click',e=>{const b=e.target.closest('[data-speed]');if(!b)return;speed=Number(b.dataset.speed);video.playbackRate=speed;$('#speedLabel').textContent=`${speed}x`;$('#speedOptions').querySelectorAll('.option').forEach(o=>o.classList.toggle('selected',o===b));toast(`Velocidade ${speed}x`);$('#speedPopover').classList.remove('open')});
+      function togglePopover(which){const p=$(`#${which}`),was=p.classList.contains('open');document.querySelectorAll('.popover').forEach(el=>el.classList.remove('open'));if(!was)p.classList.add('open')}
+      $('#speedButton').addEventListener('click',()=>togglePopover('speedPopover')); $('#seasonsButton').addEventListener('click',()=>togglePopover('seasonsPopover')); $('#episodesButton').addEventListener('click',()=>togglePopover('episodesPopover')); $('#audioButton').addEventListener('click',()=>togglePopover('audioPopover'));
+      const seasonEpisodes={1:[['O começo de tudo','A chegada muda tudo e apresenta o desafio da temporada.','42min','assets/cards/card-1.jpg'],['O próximo capítulo','Uma nova pista aparece e coloca o grupo em movimento.','48min','assets/cards/card-2.jpg'],['Novos caminhos','Escolhas difíceis dividem os personagens.','45min','assets/cards/card-3.jpg'],['Segredos revelados','O passado volta à tona e muda o plano.','51min','assets/cards/card-4.jpg']],2:[['Novos horizontes','A jornada continua em um território desconhecido.','44min','assets/cards/card-5.jpg'],['Entre escolhas','Cada decisão tem uma consequência inesperada.','47min','assets/cards/card-6.jpg'],['O que ficou para trás','Uma despedida força o grupo a recomeçar.','43min','assets/cards/card-1.jpg'],['A verdade aparece','A investigação chega ao ponto de virada.','50min','assets/cards/card-2.jpg']],3:[['Ponto de virada','Nada volta a ser como antes.','46min','assets/cards/card-3.jpg'],['Recomeços','Novas alianças surgem quando tudo parece perdido.','41min','assets/cards/card-4.jpg'],['A última chance','O plano final começa a tomar forma.','52min','assets/cards/card-5.jpg'],['Até breve','Uma conclusão emocionante prepara o próximo capítulo.','49min','assets/cards/card-6.jpg']]}; function renderEpisodeOptions(){const items=seasonEpisodes[currentSeason]||seasonEpisodes[1];$('#episodePanelSeason').textContent=currentSeason;$('#episodeOptions').innerHTML=items.map((item,i)=>`<button class="episode-card ${i+1===currentEpisode?'selected':''}" data-ep="${i+1}"><span class="episode-number">${i+1}</span><img class="episode-thumb" src="${item[3]}" alt="" loading="lazy"><span class="episode-info"><span class="episode-title-line"><span class="episode-name">${item[0]}</span><span class="episode-duration">${item[2]}</span></span><span class="episode-description">${item[1]}</span></span></button>`).join('')}
+      $('#seasonOptions').innerHTML=[1,2,3].map(n=>`<button class="option ${n===currentSeason?'selected':''}" data-season="${n}">Temporada ${n}</button>`).join(''); document.querySelectorAll('[data-close-popover]').forEach(button=>button.addEventListener('click',()=>$('#'+button.dataset.closePopover).classList.remove('open'))); $('#seasonOptions').addEventListener('click',e=>{const b=e.target.closest('[data-season]');if(!b)return;currentSeason=Number(b.dataset.season);currentEpisode=1;$('#seasonOptions').querySelectorAll('.option').forEach(o=>o.classList.toggle('selected',o===b));$('#episodeSubtitle').textContent=`Temporada ${currentSeason} · Episódio ${currentEpisode}`;renderEpisodeOptions();toast(`Temporada ${currentSeason} selecionada`);$('#seasonsPopover').classList.remove('open')}); renderEpisodeOptions();
+      $('#episodeOptions').addEventListener('click',e=>{const b=e.target.closest('[data-ep]');if(!b)return;currentEpisode=Number(b.dataset.ep);const selectedName=(seasonEpisodes[currentSeason]||seasonEpisodes[1])[currentEpisode-1]?.[0]||'Episódio';$('#episodeTitle').textContent=`S${currentSeason}:E${currentEpisode} “${selectedName}”`;$('#episodeSubtitle').textContent=`Temporada ${currentSeason} · Episódio ${currentEpisode}`;$('#episodeOptions').querySelectorAll('.episode-card').forEach(o=>o.classList.toggle('selected',o===b));toast(`Selecionado: episódio ${currentEpisode}`);$('#episodesPopover').classList.remove('open')});
+      document.querySelectorAll('[data-audio]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-audio]').forEach(x=>x.classList.toggle('selected',x===b));toast(`Áudio: ${b.dataset.audio}`)})); document.querySelectorAll('[data-subtitle]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-subtitle]').forEach(x=>x.classList.toggle('selected',x===b));toast(`Legendas: ${b.dataset.subtitle}`)}));
+      function setLocked(next,notify=true){locked=Boolean(next);shell.classList.toggle('locked',locked);$('#lockLabel').textContent=locked?'Desbloquear':'Bloquear';$('#lockButton').setAttribute('aria-label',locked?'Desbloquear controles':'Bloquear controles');$('#unlockButton').setAttribute('aria-hidden',String(!locked));if(locked)document.querySelectorAll('.popover').forEach(popover=>popover.classList.remove('open'));if(notify)toast(locked?'Controles bloqueados':'Controles desbloqueados');if(!locked)$('#unlockButton').blur()}
+      $('#lockButton').addEventListener('click',()=>setLocked(!locked)); $('#unlockButton').addEventListener('click',event=>{event.stopPropagation();setLocked(false)}); $('#nextButton').addEventListener('click',()=>toast('Próximo episódio: selecione um episódio')); $('#castButton').addEventListener('click',()=>toast('Transmissão para dispositivos não configurada')); $('#backButton').addEventListener('click',()=>{if(history.length>1)history.back();else location.href='detalhes.html'}); $('#brightnessControl').addEventListener('input',e=>{video.style.filter=`brightness(${Number(e.target.value)/82})`});
+      shell.addEventListener('mousemove',()=>{shell.classList.remove('controls-hidden');clearTimeout(hideTimer);if(!video.paused&&!locked)hideTimer=setTimeout(()=>shell.classList.add('controls-hidden'),2600)}); shell.addEventListener('touchstart',()=>{shell.classList.remove('controls-hidden');clearTimeout(hideTimer);if(!video.paused&&!locked)hideTimer=setTimeout(()=>shell.classList.add('controls-hidden'),3200)},{passive:true});
+      document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;if(locked&&(e.key==='Escape'||e.key==='Enter'||e.key===' '||e.key.toLowerCase()==='l')){e.preventDefault();setLocked(false);return}if(e.key==='Escape'&&introLayer.classList.contains('active'))return skipIntro();if(e.key===' '){e.preventDefault();togglePlay()}if(e.key==='ArrowLeft')video.currentTime=Math.max(0,(video.currentTime||0)-10);if(e.key==='ArrowRight')video.currentTime=Math.min(video.duration||Infinity,(video.currentTime||0)+10);if(e.key.toLowerCase()==='f'){if(!document.fullscreenElement)shell.requestFullscreen?.();else document.exitFullscreen?.()}if(e.key==='Escape')document.querySelectorAll('.popover').forEach(p=>p.classList.remove('open'))});
+      video.addEventListener('error',()=>{empty.classList.add('show');toast('Não foi possível carregar o vídeo')});
+    })();
+  </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/pobreflix.js"></script>
+</body>
+</html>

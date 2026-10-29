@@ -1,0 +1,1 @@
+{"name":"pobreflix-integrado","private":true,"version":"1.0.0","scripts":{"start":"node server.js","check":"node --check server.js && node --check assets/pobreflix.js && node tests/check-site.js && node tests/check-private.js","test":"npm run check"},"engines":{"node":">=18"}}

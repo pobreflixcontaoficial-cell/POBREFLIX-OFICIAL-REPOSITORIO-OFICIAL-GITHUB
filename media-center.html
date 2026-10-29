@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111111">
+  <title>Central de mídia — Pobreflix</title>
+  <style>
+    :root { color-scheme: dark; --bg:#111; --panel:#1d1d1d; --red:#e50914; --text:#f5f5f1; --muted:#b3b3b3; }
+    * { box-sizing:border-box; }
+    html { min-height:100%; background:var(--bg); }
+    body { min-height:100vh; margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.55; }
+    a { color:#ff777d; }
+    a:focus-visible { outline:3px solid #fff; outline-offset:4px; border-radius:3px; }
+    .bar { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:62px; padding:12px clamp(18px,5vw,64px); border-bottom:1px solid #333; }
+    .brand { color:var(--red); font-size:1.05rem; font-weight:850; letter-spacing:.06em; text-decoration:none; }
+    .bar nav { display:flex; flex-wrap:wrap; gap:18px; }
+    .bar nav a { color:#ddd; text-decoration:none; font-size:.92rem; }
+    main { width:min(100% - 36px, 980px); margin:clamp(38px,8vw,88px) auto 80px; }
+    .eyebrow { margin:0 0 8px; color:#ff777d; font-size:.82rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; }
+    h1 { max-width:760px; margin:0; font-size:clamp(2rem,5.5vw,3.7rem); line-height:1.08; letter-spacing:-.04em; }
+    .intro { max-width:730px; margin:22px 0 0; color:#ddd; font-size:clamp(1rem,2vw,1.15rem); }
+    .notice { margin-top:28px; padding:18px 20px; border-left:4px solid var(--red); background:#1b1b1b; color:#ddd; }
+    .notice p { margin:0; }
+    .notice p + p { margin-top:8px; }
+    h2 { margin:46px 0 16px; font-size:1.35rem; }
+    .link-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr)); gap:14px; }
+    .link-card { min-height:118px; padding:18px; border:1px solid #383838; border-radius:8px; background:var(--panel); color:var(--text); text-decoration:none; transition:border-color .15s ease, transform .15s ease; }
+    .link-card:hover { border-color:#888; transform:translateY(-2px); }
+    .link-card strong { display:block; margin-bottom:5px; color:#fff; font-size:1.05rem; }
+    .link-card span { color:var(--muted); font-size:.92rem; }
+    .small-note { margin-top:30px; color:var(--muted); font-size:.9rem; }
+    footer { padding:22px clamp(18px,5vw,64px); border-top:1px solid #333; color:var(--muted); font-size:.86rem; }
+    footer p { max-width:980px; margin:0 auto; }
+    @media(max-width:540px) { .bar { align-items:flex-start; flex-direction:column; } .bar nav { gap:12px 18px; } main { margin-top:38px; } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; } }
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <a class="brand" href="index.html">POBREFLIX</a>
+    <nav aria-label="Navegação principal">
+      <a href="index.html">Início</a>
+      <a href="catalago.html">Catálogo</a>
+      <a href="central-ajuda.html">Ajuda</a>
+    </nav>
+  </header>
+  <main>
+    <p class="eyebrow">Informações do site</p>
+    <h1>Central de mídia</h1>
+    <p class="intro">Esta página reúne atalhos para páginas locais do site. Ela é uma página informativa simples — não é uma sala de imprensa e não representa um canal oficial de imprensa.</p>
+    <section class="notice" aria-label="Sobre esta página">
+      <p><strong>Transparência:</strong> este site não disponibiliza aqui comunicados, kit de imprensa ou contatos de imprensa. Não há backend nesta página; os links abaixo levam a páginas locais existentes.</p>
+    </section>
+    <section aria-labelledby="links-title">
+      <h2 id="links-title">Páginas relacionadas</h2>
+      <div class="link-grid">
+        <a class="link-card" href="sobre.html"><strong>Sobre</strong><span>Informações apresentadas na página local Sobre.</span></a>
+        <a class="link-card" href="central-ajuda.html"><strong>Central de ajuda</strong><span>Acesse a página local de ajuda.</span></a>
+        <a class="link-card" href="contato.html"><strong>Contato</strong><span>Consulte a página local de contato.</span></a>
+        <a class="link-card" href="avisos-legais.html"><strong>Avisos legais</strong><span>Leia os avisos legais disponíveis no site.</span></a>
+        <a class="link-card" href="catalago.html"><strong>Catálogo</strong><span>Volte ao catálogo local.</span></a>
+        <a class="link-card" href="index.html"><strong>Página inicial</strong><span>Retorne ao início do site.</span></a>
+      </div>
+    </section>
+    <p class="small-note">O conteúdo e os recursos desta central são estáticos; não há envio de solicitações ou sincronização de dados nesta página.</p>
+  </main>
+  <footer><p>POBREFLIX · Página informativa local.</p></footer>
+</body>
+</html>

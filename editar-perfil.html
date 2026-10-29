@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editar perfil — POBREFLIX</title>
+  <style>
+    :root{--red:#e50914;--bg:#141414;--panel:#181818;--muted:#a3a3a3;--line:#333}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:#fff;font-family:Arial,Helvetica,sans-serif}
+    body{min-height:100vh;display:flex;flex-direction:column}
+    .page{width:min(100%,860px);margin:0 auto;padding:28px 34px 70px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:56px}
+    .brand{color:var(--red);font-size:24px;font-weight:900;letter-spacing:-1.5px;text-decoration:none}
+    .exit-link{color:#bdbdbd;text-decoration:none;font-size:13px;padding:9px 12px;border:1px solid #444;border-radius:4px;transition:.18s}
+    .exit-link:hover{color:#fff;border-color:#fff;background:#222}
+    main{width:min(100%,590px);margin:0 auto}
+    h1{font-size:clamp(28px,4vw,40px);font-weight:400;margin:0 0 28px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+    .profile-card{display:grid;grid-template-columns:116px 1fr;gap:24px;align-items:start}
+    .avatar-wrap{position:relative;width:116px;height:116px}
+    .avatar{width:116px;height:116px;border-radius:4px;background:linear-gradient(145deg,#303030,#111);border:1px solid #555;display:grid;place-items:center;overflow:hidden;color:#aaa}
+    .avatar{cursor:pointer}.avatar-art{width:100%;height:100%;display:grid;place-items:center}.avatar-art svg{width:70%;height:70%}.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .edit-photo{position:absolute;right:-9px;bottom:-9px;width:34px;height:34px;border:2px solid #141414;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;cursor:pointer;font-size:18px;font-weight:700}
+    .edit-photo:hover{background:var(--red);color:#fff}
+    .details{min-width:0}.label{display:block;color:#bdbdbd;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:4px 0 9px}
+    .name-input{width:100%;height:42px;padding:0 12px;border:1px solid #777;border-radius:2px;background:#666;color:#fff;font-size:16px;outline:0}
+    .name-input:focus{border-color:#fff;box-shadow:0 0 0 2px #ffffff22}
+    .hint{color:#999;font-size:12px;line-height:1.5;margin:9px 0 0}
+    .bio-field{margin-top:20px}.bio-label-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.bio-counter{color:#777;font-size:11px}.bio-input{display:block;width:100%;min-height:88px;margin-top:8px;padding:11px 12px;resize:vertical;border:1px solid #777;border-radius:2px;background:#666;color:#fff;font:14px/1.45 Arial,Helvetica,sans-serif;outline:0}.bio-input::placeholder{color:#bbb}.bio-input:focus{border-color:#fff;box-shadow:0 0 0 2px #ffffff22}.bio-help{margin:7px 0 0;color:#888;font-size:11px}
+    .account-manager{margin:30px 0 0;padding-top:22px;border-top:1px solid var(--line)}.account-fields{display:grid;gap:12px}.account-field{display:grid;gap:7px}.account-field label{color:#bdbdbd;font-size:12px;text-transform:uppercase;letter-spacing:1px}.account-field input,.account-field select{width:100%;height:42px;padding:0 12px;border:1px solid #777;border-radius:2px;background:#666;color:#fff;font:14px Arial,Helvetica,sans-serif;outline:0}.account-field input:focus,.account-field select:focus{border-color:#fff;box-shadow:0 0 0 2px #ffffff22}.password-row{display:flex;gap:8px}.password-row input{flex:1}.password-toggle{min-width:74px;border:1px solid #777;border-radius:3px;background:#252525;color:#ddd;cursor:pointer}.password-toggle:hover{border-color:#fff;color:#fff}.account-note{margin:10px 0 0;color:#888;font-size:11px;line-height:1.45}
+    .options{margin:34px 0 0;padding-top:22px;border-top:1px solid var(--line)}
+    .option-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:15px 0;border-bottom:1px solid #292929}.option-row.is-disabled{opacity:.5}
+    .option-row strong{display:block;font-size:14px;font-weight:600}.option-row small{display:block;color:#999;font-size:12px;margin-top:5px}
+    .banner-manager{margin-top:34px;padding-top:22px;border-top:1px solid var(--line)}.section-title{margin:0;font-size:18px;font-weight:600}.section-subtitle{margin:7px 0 18px;color:#999;font-size:12px;line-height:1.5}
+    .banner-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.banner-form input{width:100%;height:40px;padding:0 11px;border:1px solid #555;border-radius:3px;background:#252525;color:#fff;outline:0}.banner-form input:focus{border-color:#fff}.banner-form .banner-color{height:40px;padding:4px;cursor:pointer}.banner-form .banner-add{grid-column:1/-1;justify-self:start}
+    .preset-heading{margin:22px 0 10px;color:#ddd;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}.preset-banner-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.preset-banner{position:relative;min-width:0;padding:0;border:1px solid #444;border-radius:4px;overflow:hidden;background:#222;color:#fff;cursor:pointer;text-align:left}.preset-color{display:block;width:100%;aspect-ratio:16/7;transition:.18s transform}.preset-banner span{position:absolute;left:0;right:0;bottom:0;padding:20px 8px 7px;background:linear-gradient(transparent,#050505e8);font-size:10px;font-weight:700}.preset-banner:hover{border-color:#fff}.preset-banner:hover .preset-color{transform:scale(1.05)}
+    .banner-list{display:grid;gap:10px;margin-top:18px}.banner-empty{padding:18px;border:1px dashed #3b3b3b;border-radius:4px;color:#888;text-align:center;font-size:12px}.banner-item{display:grid;grid-template-columns:92px 1fr auto;gap:12px;align-items:center;padding:10px;border:1px solid #333;border-radius:4px;background:#202020}.banner-thumb{width:92px;height:56px;border-radius:3px;object-fit:cover;background:#111}.banner-copy{min-width:0}.banner-copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.banner-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#999;margin-top:5px;font-size:11px}.banner-tools{display:flex;gap:6px;align-items:center}.banner-tools button{border:1px solid #555;border-radius:3px;background:#292929;color:#ddd;padding:7px 9px;font-size:11px;cursor:pointer}.banner-tools button:hover{border-color:#fff;color:#fff}.banner-tools .banner-delete{color:#ff9da3}.banner-active{color:#8fe0ac;font-size:10px;margin-top:5px}
+    .studio{margin-top:34px;padding-top:22px;border-top:1px solid var(--line)}.studio-layout{display:grid;grid-template-columns:1fr 1fr;gap:18px}.studio-controls{display:grid;gap:11px}.studio-controls label{color:#bdbdbd;font-size:11px;text-transform:uppercase;letter-spacing:.8px}.studio-controls input[type=text],.studio-controls textarea,.studio-controls select{width:100%;padding:10px 11px;border:1px solid #555;border-radius:3px;background:#252525;color:#fff;font:13px Arial,Helvetica,sans-serif;outline:0}.studio-controls input[type=text],.studio-controls select{height:40px}.studio-controls textarea{min-height:65px;resize:vertical}.studio-controls input:focus,.studio-controls textarea:focus,.studio-controls select:focus{border-color:#fff}.studio-color-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.studio-color{width:100%;height:40px;padding:4px;border:1px solid #555;border-radius:3px;background:#252525;cursor:pointer}.studio-actions{display:flex;gap:8px;flex-wrap:wrap}.studio-actions button{min-height:38px;padding:0 12px;border:1px solid #777;border-radius:3px;background:#292929;color:#fff;font-size:12px;font-weight:700;cursor:pointer}.studio-actions button:hover{border-color:#fff}.studio-actions .primary{background:#fff;color:#111;border-color:#fff}.studio-preview-box{min-height:245px;padding:16px;border:1px solid #333;border-radius:5px;background:#111}.studio-preview-label{margin:0 0 10px;color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px}.studio-logo-preview{width:112px;height:112px;margin:0 auto 22px;border-radius:14px;display:grid;place-items:center;color:#fff;font-size:34px;font-weight:900;letter-spacing:-2px;box-shadow:0 10px 24px #0008}.studio-banner-preview{min-height:105px;padding:18px;border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;box-shadow:0 8px 20px #0008}.studio-banner-preview strong{font-size:19px}.studio-banner-preview span{margin-top:5px;color:#eee;font-size:11px}.studio-saved-logo{margin-top:12px;color:#8fe0ac;font-size:11px;text-align:center}
+    .studio-range-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.studio-range-wrap{display:grid;gap:7px}.studio-range-wrap label{display:flex;justify-content:space-between}.studio-range{width:100%;accent-color:var(--red);cursor:pointer}.studio-range-value{color:#aaa;font-size:11px}.studio-preview-box.decor-none .studio-logo-preview,.studio-preview-box.decor-none .studio-banner-preview{background-image:var(--studio-gradient)}.studio-preview-box.decor-shine .studio-logo-preview,.studio-preview-box.decor-shine .studio-banner-preview{background-image:linear-gradient(120deg,transparent 20%,#ffffff3d 45%,transparent 65%),var(--studio-gradient)}.studio-preview-box.decor-stripes .studio-logo-preview,.studio-preview-box.decor-stripes .studio-banner-preview{background-image:repeating-linear-gradient(135deg,#ffffff16 0 8px,transparent 8px 18px),var(--studio-gradient)}.studio-preview-box.decor-dots .studio-logo-preview,.studio-preview-box.decor-dots .studio-banner-preview{background-image:radial-gradient(#ffffff38 1px,transparent 1.5px),var(--studio-gradient);background-size:9px 9px,auto}.studio-preview-box.decor-frame .studio-logo-preview,.studio-preview-box.decor-frame .studio-banner-preview{background-image:var(--studio-gradient);outline:2px solid #ffffff99;outline-offset:-8px}.studio-preview-box.decor-glow .studio-logo-preview,.studio-preview-box.decor-glow .studio-banner-preview{background-image:var(--studio-gradient);box-shadow:0 0 22px var(--studio-color-one),0 10px 24px #0008}
+    .profile-banner-preview{position:relative;min-height:210px;margin:0 0 34px;border:1px solid #333;border-radius:6px;overflow:hidden;background:linear-gradient(120deg,#252525,#101010);box-shadow:0 12px 35px #0008}.profile-banner-preview.has-banner{background-size:cover;background-position:center}.profile-banner-preview:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#050505e8 0%,#05050599 45%,#05050522 100%),linear-gradient(0deg,#050505d9 0%,transparent 65%)}.profile-banner-content{position:relative;z-index:1;min-height:210px;display:flex;flex-direction:column;justify-content:flex-end;padding:24px 24px 24px 170px}.profile-banner-kicker{color:#e50914;text-transform:uppercase;letter-spacing:1.5px;font-size:10px;font-weight:800;margin-bottom:6px}.profile-banner-title{margin:0;font-size:clamp(20px,4vw,32px);font-weight:800}.profile-banner-description{max-width:430px;margin:7px 0 0;color:#ddd;font-size:12px;line-height:1.45}.profile-banner-avatar{position:absolute;z-index:2;left:24px;bottom:24px;width:116px;height:116px;border:3px solid #fff;border-radius:6px;overflow:hidden;background:#222;box-shadow:0 7px 22px #000}.profile-banner-avatar .avatar-art{width:100%;height:100%}.profile-banner-avatar img{width:100%;height:100%;object-fit:cover}.profile-banner-placeholder{color:#999;font-size:11px;text-align:center;padding:12px}
+    .switch{position:relative;width:42px;height:23px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:99px;background:#555;cursor:pointer;transition:.2s}.slider:before{content:"";position:absolute;width:17px;height:17px;left:3px;top:3px;border-radius:50%;background:#ddd;transition:.2s}.switch input:checked+.slider{background:var(--red)}.switch input:checked+.slider:before{transform:translateX(19px);background:#fff}.switch input:disabled+.slider{cursor:not-allowed;background:#333}.switch input:disabled+.slider:before{background:#888}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}.button{min-height:40px;padding:0 18px;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;transition:.18s}.primary{border:1px solid #fff;background:#fff;color:#111}.primary:hover{background:#ddd}.secondary{border:1px solid #777;background:transparent;color:#ddd}.secondary:hover{border-color:#fff;color:#fff}.danger{border:1px solid #5b2024;background:#260e10;color:#ff8b91}.danger:hover{border-color:var(--red);background:#3a1014}
+    .status{min-height:20px;color:#aaa;font-size:12px;margin:18px 0 0}.status.success{color:#8fe0ac}.status.error{color:#ff8b91}
+    .footer-note{text-align:center;color:#666;font-size:11px;margin-top:54px}
+    @media(max-width:600px){.page{padding:20px 20px 48px}.topbar{margin-bottom:38px}.profile-card{grid-template-columns:82px 1fr;gap:16px}.avatar-wrap,.avatar{width:82px;height:82px}.avatar svg{width:50px;height:50px}.name-input{font-size:14px}.actions .button{flex:1 1 auto;padding:0 12px}.option-row{align-items:flex-start}}
+  
+    .photo-picker{position:fixed;inset:0;z-index:20;display:none;overflow:auto;background:#050505;color:#fff}
+    .photo-picker.open{display:block}
+    .picker-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:18px;height:58px;padding:0 18px;background:linear-gradient(#050505,#050505ed 75%,transparent);border-bottom:1px solid #1f1f1f}
+    .picker-back{width:32px;height:32px;display:grid;place-items:center;border:0;background:transparent;color:#fff;font-size:30px;line-height:1;cursor:pointer}
+    .picker-back:hover{color:#bbb}
+    .picker-title{margin:0;font-size:18px;font-weight:400}
+    .picker-content{width:min(100%,940px);margin:0 auto;padding:24px 24px 64px}
+    .picker-group{margin:0 0 28px}.picker-group h2{margin:0 0 12px;font-size:18px;font-weight:700}
+    .avatar-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+    .avatar-option{position:relative;min-width:0;padding:0;border:0;background:transparent;color:#fff;cursor:pointer;text-align:center}
+    .avatar-option:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:6px}
+    .mini-avatar{position:relative;aspect-ratio:1;border-radius:7px;display:grid;place-items:center;overflow:hidden;border:2px solid transparent;background:#202020;box-shadow:0 5px 18px #0008;transition:.18s transform,.18s border-color,.18s box-shadow}
+    .mini-avatar svg{width:70%;height:70%}.mini-avatar img{width:100%;height:100%;display:block;object-fit:cover}
+    .avatar-option:hover .mini-avatar{transform:translateY(-3px);border-color:#777;box-shadow:0 8px 24px #000b}.avatar-option.selected .mini-avatar{border-color:#fff;box-shadow:0 0 0 3px #e50914,0 8px 24px #000b}
+    .avatar-option.selected .mini-avatar:after{content:'';background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12 4 4L19 6' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;position:absolute;right:6px;top:6px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:#e50914;color:#fff;font-size:14px;font-weight:900}
+    .avatar-option span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#aaa;font-size:11px;margin-top:8px}.avatar-option.selected span{color:#fff;font-weight:700}
+    .avatar-green{background:radial-gradient(circle at 50% 40%,#24f55a,#087a2c 58%,#032d16)}.avatar-blue{background:radial-gradient(circle at 50% 40%,#40c9ff,#1761b0 58%,#091c58)}.avatar-purple{background:radial-gradient(circle at 50% 40%,#d25cff,#6c1bb2 58%,#260545)}.avatar-orange{background:radial-gradient(circle at 50% 40%,#ffbf40,#d74716 58%,#481207)}.avatar-pink{background:radial-gradient(circle at 50% 40%,#ff78bb,#c51b66 58%,#480523)}.avatar-gold{background:radial-gradient(circle at 50% 40%,#ffe36a,#b87216 58%,#3d2105)}
+    .avatar-photo{filter:saturate(1.15)}.avatar-photo.blue{filter:hue-rotate(145deg) saturate(1.2)}.avatar-photo.purple{filter:hue-rotate(245deg) saturate(1.25)}.avatar-photo.orange{filter:hue-rotate(295deg) saturate(1.2)}
+    .picker-actions{display:flex;justify-content:center;gap:10px;margin-top:22px;flex-wrap:wrap}
+    .picker-button{min-height:40px;padding:0 18px;border:1px solid #777;border-radius:3px;background:#222;color:#fff;font-size:13px;font-weight:700;cursor:pointer}.picker-button:hover{border-color:#fff;background:#333}.picker-button.primary{border-color:#fff;background:#fff;color:#111}.picker-button.primary:hover{background:#ddd}
+    @media(max-width:760px){.avatar-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    @media(max-width:420px){.avatar-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}}
+    @media(max-width:600px){.picker-content{padding:20px 12px 44px}.picker-header{height:52px;padding:0 10px;gap:12px}.picker-title{font-size:17px}.picker-group h2{font-size:17px}.profile-banner-content{padding:22px 16px 18px 118px;min-height:175px}.profile-banner-preview{min-height:175px}.profile-banner-avatar{left:14px;bottom:18px;width:88px;height:88px}.banner-item{grid-template-columns:68px 1fr}.banner-thumb{width:68px;height:48px}.banner-tools{grid-column:2}.banner-form{grid-template-columns:1fr}.banner-form .banner-add{grid-column:1}.preset-banner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.studio-layout{grid-template-columns:1fr}.studio-logo-preview{width:96px;height:96px}}
+  </style>
+<style>.pf-icon{display:inline-block;width:16px;height:16px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.page-flow .pf-icon,.shortcut .pf-icon{margin:0 4px}</style>
+<style>@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }</style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="Página inicial POBREFLIX">POBREFLIX</a>
+      <a class="exit-link" href="catalago.html">Voltar ao catálogo</a>
+    </header>
+
+    <main>
+      <h1>Editar perfil</h1>
+      <section class="profile-banner-preview" id="profileBannerPreview" aria-label="Prévia do banner do perfil">
+        <div class="profile-banner-avatar" id="profileBannerAvatar"><div class="profile-banner-placeholder">Seu avatar</div></div>
+        <div class="profile-banner-content"><div class="profile-banner-kicker">Prévia do catálogo</div><h2 class="profile-banner-title" id="profileBannerTitle">Seu banner aparecerá aqui</h2><p class="profile-banner-description" id="profileBannerDescription">Adicione ou ative um banner para visualizar como ele ficará atrás da foto do perfil.</p></div>
+      </section>
+      <section class="profile-card" aria-label="Dados do perfil">
+        <div class="avatar-wrap">
+          <div class="avatar" id="avatar" aria-label="Foto do perfil">
+            <div class="avatar-art" id="avatarArt"><svg id="placeholder" aria-hidden="true" fill="none" viewBox="0 0 48 48"><circle cx="24" cy="16" r="8" stroke="currentColor" stroke-width="2.2"/><path d="M8 42c1.4-8.4 7-13 16-13s14.6 4.6 16 13" stroke="currentColor" stroke-linecap="round" stroke-width="2.2"/></svg></div>
+            <img id="avatarImage" alt="" hidden>
+          </div>
+          <button class="edit-photo" id="photoButton" type="button" aria-label="Alterar foto"><svg class="pf-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m4 16-1 5 5-1L20 8l-4-4z"/><path d="m14 6 4 4"/></svg></button>
+          <input id="photoInput" type="file" accept="image/*" aria-label="Selecionar foto de perfil" hidden>
+        </div>
+        <div class="details">
+          <label class="label" for="profileName">Nome do perfil</label>
+          <input class="name-input" id="profileName" maxlength="32" autocomplete="off" value="Meu perfil">
+          <p class="hint">Seu nome e sua foto aparecem no menu de perfil.</p>
+          <div class="bio-field">
+            <div class="bio-label-row"><label class="label" for="profileBio" style="margin:0">Bio do perfil</label><span class="bio-counter" id="bioCounter">0/160</span></div>
+            <textarea class="bio-input" id="profileBio" maxlength="160" placeholder="Conte um pouco sobre este perfil..."></textarea>
+            <p class="bio-help">Sua bio aparece junto ao perfil e fica salva neste navegador.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="account-manager" aria-label="Informações da conta">
+        <h2 class="section-title">Informações da conta</h2>
+        <p class="section-subtitle">Gerencie os dados usados para acessar esta conta.</p>
+        <div class="account-fields">
+          <div class="account-field"><label for="accountEmail">E-mail</label><input id="accountEmail" type="email" maxlength="120" autocomplete="email" placeholder="seuemail@exemplo.com"></div>
+          <div class="account-field"><label for="accountPassword">Senha</label><div class="password-row"><input id="accountPassword" type="password" maxlength="80" autocomplete="new-password" placeholder="Digite sua senha"><button class="password-toggle" id="passwordToggle" type="button">Mostrar</button></div></div>
+        </div>
+        <p class="account-note">Nesta versão, os dados ficam salvos somente neste navegador.</p>
+      </section>
+
+      <section class="options" aria-label="Preferências do perfil">
+        <div class="option-row"><div><strong>Tipo de conta</strong><small>Escolha entre uma conta adulta ou infantil.</small></div><select id="accountType" aria-label="Tipo de perfil" class="account-field" style="width:150px;height:36px;padding:0 8px;background:#252525;color:#fff;border:1px solid #777;border-radius:3px"><option value="adult">Adulto</option><option value="child">Infantil</option></select></div>
+        <div class="option-row" id="kidsModeRow"><div><strong>Perfil infantil</strong><small>Exibir somente conteúdos adequados para crianças.</small></div><label class="switch"><input id="kidsMode" type="checkbox" aria-label="Ativar perfil infantil"><span class="slider"></span></label></div>
+        <div class="option-row"><div><strong>Reprodução automática</strong><small>Iniciar automaticamente o próximo episódio.</small></div><label class="switch"><input id="autoplay" type="checkbox" checked aria-label="Ativar reprodução automática"><span class="slider"></span></label></div>
+      </section>
+
+      <section class="banner-manager" aria-label="Gerenciamento de banners">
+        <h2 class="section-title">Gerenciar banners</h2>
+        <p class="section-subtitle">Crie banners promocionais somente com cores, título e descrição. Eles ficam salvos neste navegador.</p>
+        <form class="banner-form" id="bannerForm">
+          <input id="bannerTitle" name="bannerTitle" type="text" maxlength="60" placeholder="Título do banner" aria-label="Título do banner" required>
+          <input id="bannerSubtitle" name="bannerSubtitle" type="text" maxlength="100" placeholder="Descrição curta" aria-label="Descrição curta do banner">
+          <input class="banner-color" id="bannerColorInput" type="color" value="#e50914" aria-label="Cor do banner">
+          <button class="picker-button primary banner-add" type="submit">Adicionar banner</button>
+        </form>
+        <h3 class="preset-heading">Banners padrão dos mascotes</h3>
+        <div class="preset-banner-grid" id="presetBannerGrid" aria-label="Banners padrão para seleção"></div>
+        <div class="banner-list" id="bannerList" aria-live="polite"></div>
+      </section>
+
+      <section class="studio" aria-label="Estúdio de logo e banner">
+        <h2 class="section-title">Estúdio de logo e banner</h2>
+        <p class="section-subtitle">Crie sua própria identidade visual com prévia instantânea. A logo usa as iniciais do nome e o banner usa apenas cores.</p>
+        <div class="studio-layout">
+          <div class="studio-controls">
+            <div><label for="studioName">Nome da criação</label><input id="studioName" type="text" maxlength="32" value="Minha marca" placeholder="Nome da sua marca"></div>
+            <div><label for="studioDescription">Texto do banner</label><textarea id="studioDescription" maxlength="100" placeholder="Uma frase para aparecer no banner">Sua experiência começa aqui</textarea></div>
+            <div class="studio-color-row"><div><label for="studioColorOne">Cor principal</label><input class="studio-color" id="studioColorOne" type="color" value="#e50914"></div><div><label for="studioColorTwo">Cor secundária</label><input class="studio-color" id="studioColorTwo" type="color" value="#370617"></div></div>
+            <div><label for="studioDirection">Direção do gradiente</label><select id="studioDirection"><option value="135deg">Diagonal</option><option value="90deg">Horizontal</option><option value="180deg">Vertical</option><option value="45deg">Diagonal invertida</option></select></div>
+            <div><label for="studioDecoration">Camada decorativa</label><select id="studioDecoration"><option value="none">Sem decoração</option><option value="shine">Brilho</option><option value="stripes">Listras</option><option value="dots">Pontos</option><option value="frame">Moldura</option><option value="glow">Neon</option></select></div>
+            <div class="studio-range-row"><div class="studio-range-wrap"><label for="studioBorderWidth">Borda <span class="studio-range-value" id="studioBorderWidthValue">2px</span></label><input class="studio-range" id="studioBorderWidth" type="range" min="0" max="8" value="2"></div><div class="studio-range-wrap"><label for="studioRadius">Cantos <span class="studio-range-value" id="studioRadiusValue">14px</span></label><input class="studio-range" id="studioRadius" type="range" min="0" max="32" value="14"></div></div>
+            <div><label for="studioBorderColor">Cor da borda</label><input class="studio-color" id="studioBorderColor" type="color" value="#ffffff"></div>
+            <div class="studio-actions"><button class="primary" id="saveStudioLogo" type="button">Salvar logo</button><button id="saveStudioBanner" type="button">Usar como banner</button><button id="resetStudio" type="button">Limpar</button></div>
+          </div>
+          <div class="studio-preview-box"><p class="studio-preview-label">Prévia da sua criação</p><div class="studio-logo-preview" id="studioLogoPreview">MM</div><div class="studio-banner-preview" id="studioBannerPreview"><strong id="studioBannerTitle">Minha marca</strong><span id="studioBannerDescription">Sua experiência começa aqui</span></div><div class="studio-saved-logo" id="studioSavedLogo" aria-live="polite"></div></div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="button primary" id="saveButton" type="button">Salvar</button>
+        <a class="button secondary" href="catalago.html" style="display:inline-flex;align-items:center;text-decoration:none">Cancelar</a>
+        <button class="button danger" id="deleteButton" type="button">Remover perfil</button>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
+      <p class="footer-note">As alterações ficam salvas neste navegador.</p>
+    </main>
+  </div>
+
+  <section class="photo-picker" id="photoPicker" aria-hidden="true" aria-labelledby="pickerTitle">
+    <header class="picker-header">
+      <button class="picker-back" id="pickerBack" type="button" aria-label="Voltar">‹</button>
+      <h1 class="picker-title" id="pickerTitle">Selecionar foto</h1>
+    </header>
+    <div class="picker-content">
+      <section class="picker-group" aria-label="Biblioteca de fotos">
+        <h2>Fotos do perfil</h2>
+        <div class="avatar-grid" id="avatarGrid">
+          <button class="avatar-option" type="button" data-avatar="mascote-verde" data-src="assets/embedded-021f2a5650f965.webp" aria-label="Mascote com fundo verde"><div class="mini-avatar"><img src="assets/embedded-021f2a5650f965.webp" alt=""></div><span>Verde</span></button>
+          <button class="avatar-option" type="button" data-avatar="mascote-azul" data-src="assets/embedded-846c04e633610b.webp" aria-label="Mascote com fundo azul"><div class="mini-avatar"><img src="assets/embedded-846c04e633610b.webp" alt=""></div><span>Azul</span></button>
+          <button class="avatar-option" type="button" data-avatar="mascote-roxo" data-src="assets/embedded-212b4a3deee034.webp" aria-label="Mascote com fundo roxo"><div class="mini-avatar"><img src="assets/embedded-212b4a3deee034.webp" alt=""></div><span>Roxo</span></button>
+          <button class="avatar-option" type="button" data-avatar="mascote-vermelho" data-src="assets/embedded-dddaf4a8884215.webp" aria-label="Mascote com fundo vermelho"><div class="mini-avatar"><img src="assets/embedded-dddaf4a8884215.webp" alt=""></div><span>Vermelho</span></button>
+          <button class="avatar-option" type="button" data-avatar="mascote-laranja" data-src="assets/embedded-a5a1fa59c7f942.webp" aria-label="Mascote com fundo laranja"><div class="mini-avatar"><img src="assets/embedded-a5a1fa59c7f942.webp" alt=""></div><span>Laranja</span></button>
+          <button class="avatar-option" type="button" data-avatar="mascote-rosa" data-src="assets/embedded-736a3185c425ca.webp" aria-label="Mascote com fundo rosa"><div class="mini-avatar"><img src="assets/embedded-736a3185c425ca.webp" alt=""></div><span>Rosa</span></button>
+          <button class="avatar-option" type="button" data-avatar="mascote-ciano" data-src="assets/embedded-a2de906ac5cad3.webp" aria-label="Mascote com fundo ciano"><div class="mini-avatar"><img src="assets/embedded-a2de906ac5cad3.webp" alt=""></div><span>Ciano</span></button>
+          <button class="avatar-option" type="button" data-avatar="mascote-dourado" data-src="assets/embedded-4be8d91e9531f9.webp" aria-label="Mascote com fundo dourado"><div class="mini-avatar"><img src="assets/embedded-4be8d91e9531f9.webp" alt=""></div><span>Dourado</span></button>
+        </div>
+      </section>
+      <div class="picker-actions">
+        <button class="picker-button primary" id="pickerUpload" type="button">Escolher foto do dispositivo</button>
+        <button class="picker-button" id="pickerCancel" type="button">Cancelar</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (()=>{
+      const NAME_KEY='pobreflix_profile_name_v1', BIO_KEY='pobreflix_profile_bio_v1', EMAIL_KEY='pobreflix_account_email_v1', PASSWORD_KEY='pobreflix_account_password_v1', TYPE_KEY='pobreflix_account_type_v1', KIDS_KEY='pobreflix_kids_mode_v1', PHOTO_KEY='pobreflix_profile_photo_v1', AVATAR_KEY='pobreflix_profile_avatar_v1';
+      const name=document.getElementById('profileName'), bio=document.getElementById('profileBio'), bioCounter=document.getElementById('bioCounter'), accountEmail=document.getElementById('accountEmail'), accountPassword=document.getElementById('accountPassword'), accountType=document.getElementById('accountType'), kidsMode=document.getElementById('kidsMode'), kidsModeRow=document.getElementById('kidsModeRow'), avatarImage=document.getElementById('avatarImage'), avatarArt=document.getElementById('avatarArt'), placeholder=document.getElementById('placeholder'), status=document.getElementById('status');
+      const profileBannerPreview=document.getElementById('profileBannerPreview'), profileBannerAvatar=document.getElementById('profileBannerAvatar');
+      function syncBannerAvatar(){if(avatarImage.hidden){profileBannerAvatar.innerHTML=avatarArt.innerHTML}else{profileBannerAvatar.innerHTML=`<img src="${avatarImage.src}" alt="">`}}
+      const read=(key)=>{try{return localStorage.getItem(key)}catch(_){return null}};
+      const write=(key,value)=>{try{localStorage.setItem(key,value);return true}catch(_){return false}};
+      const storedName=read(NAME_KEY), storedBio=read(BIO_KEY), storedEmail=read(EMAIL_KEY), storedType=read(TYPE_KEY)||'adult', storedKids=read(KIDS_KEY); if(storedName) name.value=storedName; if(storedBio) bio.value=storedBio; if(storedEmail) accountEmail.value=storedEmail; accountType.value=storedType;
+      const syncAccountType=(persist=true)=>{const adult=accountType.value==='adult';kidsMode.disabled=adult;kidsModeRow.classList.toggle('is-disabled',adult);if(adult)kidsMode.checked=false;else if(storedKids==='true'||persist&&kidsMode.checked)kidsMode.checked=true;if(persist){write(TYPE_KEY,accountType.value);write(KIDS_KEY,String(kidsMode.checked))}};
+      syncAccountType(false); accountType.addEventListener('change',()=>{syncAccountType(true);message(accountType.value==='adult'?'Conta adulta selecionada. O perfil infantil foi desativado.':'Conta infantil selecionada.','success')}); kidsMode.addEventListener('change',()=>write(KIDS_KEY,String(kidsMode.checked)));
+      document.getElementById('passwordToggle').addEventListener('click',()=>{const visible=accountPassword.type==='text';accountPassword.type=visible?'password':'text';document.getElementById('passwordToggle').textContent=visible?'Mostrar':'Ocultar'});
+      const updateBioCounter=()=>{bioCounter.textContent=`${bio.value.length}/160`}; updateBioCounter(); bio.addEventListener('input',()=>{updateBioCounter();write(BIO_KEY,bio.value)});
+      const storedPhoto=read(PHOTO_KEY), avatarGrid=document.getElementById('avatarGrid');
+      const markSelected=(id)=>{avatarGrid.querySelectorAll('.avatar-option').forEach(option=>option.classList.toggle('selected',option.dataset.avatar===id))};
+      const selectAvatar=(option,persist=true)=>{
+        const source=option.dataset.src;
+        if(source){avatarImage.src=source;avatarImage.hidden=false;avatarArt.hidden=true}else{avatarArt.innerHTML=option.querySelector('.mini-avatar').innerHTML;avatarArt.hidden=false;avatarImage.hidden=true}
+        syncBannerAvatar();
+        markSelected(option.dataset.avatar);
+        if(persist){write(AVATAR_KEY,option.dataset.avatar);localStorage.removeItem(PHOTO_KEY)}
+      };
+      const storedAvatar=read(AVATAR_KEY), storedOption=storedAvatar&&avatarGrid.querySelector(`[data-avatar="${CSS.escape(storedAvatar)}"]`);
+      if(storedOption) selectAvatar(storedOption,false);
+      else if(storedPhoto&&/^data:image\/(png|jpeg|webp|gif);base64,/i.test(storedPhoto)){avatarImage.src=storedPhoto;avatarImage.hidden=false;avatarArt.hidden=true}
+      syncBannerAvatar();
+      const message=(text,type='')=>{status.textContent=text;status.className='status '+type};
+      const picker=document.getElementById('photoPicker');
+      const openPicker=()=>{picker.classList.add('open');picker.setAttribute('aria-hidden','false');document.body.style.overflow='hidden'};
+      const closePicker=()=>{picker.classList.remove('open');picker.setAttribute('aria-hidden','true');document.body.style.overflow=''};
+      document.getElementById('photoButton').addEventListener('click',openPicker);
+      document.getElementById('avatar').addEventListener('click',openPicker);
+      document.getElementById('pickerBack').addEventListener('click',closePicker);
+      document.getElementById('pickerCancel').addEventListener('click',closePicker);
+      document.getElementById('pickerUpload').addEventListener('click',()=>document.getElementById('photoInput').click());
+      avatarGrid.addEventListener('click',event=>{const option=event.target.closest('.avatar-option');if(!option)return;selectAvatar(option);closePicker();message('Avatar atualizado.','success')});
+      document.addEventListener('keydown',event=>{if(event.key==='Escape'&&picker.classList.contains('open'))closePicker()});
+      document.getElementById('photoInput').addEventListener('change',event=>{const file=event.target.files&&event.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){message('Escolha um arquivo de imagem.','error');return}if(file.size>8*1024*1024){message('A imagem precisa ter até 8 MB.','error');return}const reader=new FileReader();reader.onload=()=>{avatarImage.src=String(reader.result);avatarImage.hidden=false;avatarArt.hidden=true;syncBannerAvatar();avatarGrid.querySelectorAll('.avatar-option').forEach(option=>option.classList.remove('selected'));localStorage.removeItem(AVATAR_KEY);write(PHOTO_KEY,String(reader.result));closePicker();message('Foto atualizada.','success')};reader.readAsDataURL(file)});
+      const BANNERS_KEY='pobreflix_profile_banners_v1', bannerList=document.getElementById('bannerList'), bannerForm=document.getElementById('bannerForm'), presetBannerGrid=document.getElementById('presetBannerGrid');
+      const getBanners=()=>{try{return JSON.parse(localStorage.getItem(BANNERS_KEY)||'[]')}catch(_){return[]}};
+      const saveBanners=(items)=>write(BANNERS_KEY,JSON.stringify(items));
+      const escapeHtml=(value)=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const presetColors=[['verde','Verde','linear-gradient(135deg,#16a34a,#052e16)'],['azul','Azul','linear-gradient(135deg,#2563eb,#172554)'],['roxo','Roxo','linear-gradient(135deg,#9333ea,#2e1065)'],['vermelho','Vermelho','linear-gradient(135deg,#dc2626,#450a0a)'],['laranja','Laranja','linear-gradient(135deg,#f97316,#431407)'],['rosa','Rosa','linear-gradient(135deg,#ec4899,#500724)'],['ciano','Ciano','linear-gradient(135deg,#06b6d4,#083344)'],['dourado','Dourado','linear-gradient(135deg,#eab308,#422006)']];
+      const renderPresetBanners=()=>{presetBannerGrid.innerHTML=presetColors.map(([id,label,color])=>`<button class="preset-banner" type="button" data-preset-id="${id}" data-preset-color="${color}"><span class="preset-color" style="background:${color}"></span><span>Usar banner ${label}</span></button>`).join('')};
+      const renderBanners=()=>{const items=getBanners(),active=items.find(item=>item.active);if(active){profileBannerPreview.classList.add('has-banner');profileBannerPreview.style.backgroundImage=active.image?`url("${active.image}")`:'none';profileBannerPreview.style.background=active.image?'':active.color||'';document.getElementById('profileBannerTitle').textContent=active.title;document.getElementById('profileBannerDescription').textContent=active.subtitle||'Banner ativo no catálogo'}else{profileBannerPreview.classList.remove('has-banner');profileBannerPreview.style.backgroundImage='';profileBannerPreview.style.background='';document.getElementById('profileBannerTitle').textContent='Seu banner aparecerá aqui';document.getElementById('profileBannerDescription').textContent='Adicione ou ative um banner para visualizar como ele ficará atrás da foto do perfil.'}if(!items.length){bannerList.innerHTML='<div class="banner-empty">Nenhum banner cadastrado ainda.</div>';return}bannerList.innerHTML=items.map(item=>`<article class="banner-item">${item.image?`<img class="banner-thumb" src="${item.image}" alt="">`:`<div class="banner-thumb" style="background:${item.color||'#333'}"></div>`}<div class="banner-copy"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.subtitle||'Sem descrição')}</small><div class="banner-active">${item.active?'● Ativo no catálogo':'○ Desativado'}</div></div><div class="banner-tools"><button type="button" data-banner-action="toggle" data-banner-id="${item.id}">${item.active?'Desativar':'Ativar'}</button><button class="banner-delete" type="button" data-banner-action="delete" data-banner-id="${item.id}">Excluir</button></div></article>`).join('')};
+      const studioName=document.getElementById('studioName'),studioDescription=document.getElementById('studioDescription'),studioColorOne=document.getElementById('studioColorOne'),studioColorTwo=document.getElementById('studioColorTwo'),studioDirection=document.getElementById('studioDirection'),studioDecoration=document.getElementById('studioDecoration'),studioBorderWidth=document.getElementById('studioBorderWidth'),studioRadius=document.getElementById('studioRadius'),studioBorderColor=document.getElementById('studioBorderColor'),studioLogoPreview=document.getElementById('studioLogoPreview'),studioBannerPreview=document.getElementById('studioBannerPreview'),studioBannerTitle=document.getElementById('studioBannerTitle'),studioBannerDescription=document.getElementById('studioBannerDescription'),studioSavedLogo=document.getElementById('studioSavedLogo'),studioPreviewBox=document.querySelector('.studio-preview-box'),STUDIO_KEY='pobreflix_studio_logo_v1';
+      const initials=(value)=>{const parts=value.trim().split(/\s+/).filter(Boolean);return (parts.length>1?parts[0][0]+parts[parts.length-1][0]:value.trim().slice(0,2)).toUpperCase()||'MM'};
+      const studioUpdate=()=>{const gradient=`linear-gradient(${studioDirection.value},${studioColorOne.value},${studioColorTwo.value})`,title=studioName.value.trim()||'Minha marca',description=studioDescription.value.trim()||'Sua experiência começa aqui',decoration=studioDecoration.value,borderWidth=studioBorderWidth.value,borderRadius=studioRadius.value,borderColor=studioBorderColor.value;studioLogoPreview.textContent=initials(title);studioLogoPreview.style.setProperty('--studio-gradient',gradient);studioBannerPreview.style.setProperty('--studio-gradient',gradient);studioLogoPreview.style.background='';studioBannerPreview.style.background='';studioLogoPreview.style.border=`${borderWidth}px solid ${borderColor}`;studioBannerPreview.style.border=`${borderWidth}px solid ${borderColor}`;studioLogoPreview.style.borderRadius=`${borderRadius}px`;studioBannerPreview.style.borderRadius=`${Math.min(Number(borderRadius),18)}px`;studioPreviewBox.className=`studio-preview-box decor-${decoration}`;studioPreviewBox.style.setProperty('--studio-color-one',studioColorOne.value);studioBannerTitle.textContent=title;studioBannerDescription.textContent=description;document.getElementById('studioBorderWidthValue').textContent=`${borderWidth}px`;document.getElementById('studioRadiusValue').textContent=`${borderRadius}px`;return {title,description,gradient,colorOne:studioColorOne.value,colorTwo:studioColorTwo.value,direction:studioDirection.value,decoration,borderWidth,borderRadius,borderColor}};
+      [studioName,studioDescription,studioColorOne,studioColorTwo,studioDirection,studioDecoration,studioBorderWidth,studioRadius,studioBorderColor].forEach(control=>control.addEventListener('input',studioUpdate));
+      const storedStudio=read(STUDIO_KEY);if(storedStudio){try{const logo=JSON.parse(storedStudio);studioName.value=logo.title||studioName.value;studioDescription.value=logo.description||studioDescription.value;studioColorOne.value=logo.colorOne||studioColorOne.value;studioColorTwo.value=logo.colorTwo||studioColorTwo.value;studioDirection.value=logo.direction||studioDirection.value;studioDecoration.value=logo.decoration||studioDecoration.value;studioBorderWidth.value=logo.borderWidth||studioBorderWidth.value;studioRadius.value=logo.borderRadius||studioRadius.value;studioBorderColor.value=logo.borderColor||studioBorderColor.value;studioSavedLogo.textContent='Logo criada e salva neste navegador.'}catch(_){}}
+      studioUpdate();
+      document.getElementById('saveStudioLogo').addEventListener('click',()=>{const logo=studioUpdate();write(STUDIO_KEY,JSON.stringify(logo));studioSavedLogo.textContent='Logo criada e salva neste navegador.';message('Sua logo foi salva.','success')});
+      document.getElementById('saveStudioBanner').addEventListener('click',()=>{const design=studioUpdate(),items=getBanners();items.forEach(item=>item.active=false);items.unshift({id:'studio-'+Date.now().toString(36),title:design.title,subtitle:design.description,color:design.gradient,active:true});saveBanners(items);renderBanners();message('Banner criado no estúdio e ativado.','success')});
+      document.getElementById('resetStudio').addEventListener('click',()=>{studioName.value='Minha marca';studioDescription.value='Sua experiência começa aqui';studioColorOne.value='#e50914';studioColorTwo.value='#370617';studioDirection.value='135deg';studioDecoration.value='none';studioBorderWidth.value='2';studioRadius.value='14';studioBorderColor.value='#ffffff';studioSavedLogo.textContent='';studioUpdate();message('Estúdio restaurado.','success')});
+      bannerForm.addEventListener('submit',event=>{event.preventDefault();const title=document.getElementById('bannerTitle').value.trim(),subtitle=document.getElementById('bannerSubtitle').value.trim(),color=document.getElementById('bannerColorInput').value;if(!title){message('Informe um título para o banner.','error');return}const items=getBanners();items.forEach(item=>item.active=false);items.unshift({id:Date.now().toString(36),title,subtitle,color,active:true});saveBanners(items);bannerForm.reset();document.getElementById('bannerColorInput').value='#e50914';renderBanners();message('Banner de cor adicionado com sucesso.','success')});
+      presetBannerGrid.addEventListener('click',event=>{const preset=event.target.closest('[data-preset-id]');if(!preset)return;const items=getBanners(),id='preset-'+preset.dataset.presetId;items.forEach(item=>item.active=false);const existing=items.find(item=>item.id===id);if(existing)existing.active=true;else items.unshift({id,title:'Banner '+preset.dataset.presetId,subtitle:'Estilo de cor padrão',color:preset.dataset.presetColor,active:true});saveBanners(items);renderBanners();message('Banner de cor selecionado.','success')});
+      renderPresetBanners();
+      bannerList.addEventListener('click',event=>{const button=event.target.closest('[data-banner-action]');if(!button)return;const id=button.dataset.bannerId,items=getBanners(),index=items.findIndex(item=>item.id===id);if(index<0)return;if(button.dataset.bannerAction==='delete'){if(!confirm('Excluir este banner?'))return;items.splice(index,1);message('Banner excluído.','success')}else{items[index].active=!items[index].active;message(items[index].active?'Banner ativado.':'Banner desativado.','success')}saveBanners(items);renderBanners()});
+      renderBanners();
+      document.getElementById('saveButton').addEventListener('click',()=>{const value=name.value.trim(),email=accountEmail.value.trim();if(!value){message('Digite um nome para o perfil.','error');name.focus();return}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){message('Digite um e-mail válido.','error');accountEmail.focus();return}name.value=value;accountEmail.value=email;write(NAME_KEY,value);write(BIO_KEY,bio.value.trim());write(EMAIL_KEY,email);localStorage.removeItem(PASSWORD_KEY);syncAccountType(true);updateBioCounter();message('Perfil e informações da conta salvos com sucesso.','success')});
+      document.getElementById('deleteButton').addEventListener('click',()=>{if(!confirm('Remover este perfil e sua foto deste navegador?'))return;[NAME_KEY,BIO_KEY,EMAIL_KEY,PASSWORD_KEY,TYPE_KEY,KIDS_KEY,PHOTO_KEY,AVATAR_KEY,STUDIO_KEY].forEach(key=>localStorage.removeItem(key));name.value='Meu perfil';bio.value='';accountEmail.value='';accountPassword.value='';accountType.value='adult';syncAccountType(false);studioName.value='Minha marca';studioDescription.value='Sua experiência começa aqui';studioColorOne.value='#e50914';studioColorTwo.value='#370617';studioDirection.value='135deg';studioDecoration.value='none';studioBorderWidth.value='2';studioRadius.value='14';studioBorderColor.value='#ffffff';studioSavedLogo.textContent='';studioUpdate();updateBioCounter();avatarImage.hidden=true;avatarArt.hidden=false;avatarArt.innerHTML=placeholder.outerHTML;syncBannerAvatar();markSelected('');message('Perfil removido.','success')});
+    })();
+  </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/pobreflix.js"></script>
+</body>
+</html>

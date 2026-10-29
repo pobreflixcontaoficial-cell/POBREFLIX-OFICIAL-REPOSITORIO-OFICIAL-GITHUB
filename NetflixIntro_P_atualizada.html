@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Netflix intro</title>
+  <style>
+    :root { background:#000; color-scheme:dark; }
+    *,*::before,*::after { box-sizing:border-box; }
+    html,body { width:100%; height:100%; margin:0; background:#000; overflow:hidden; }
+    body { display:grid; place-items:center; }
+    video { display:block; width:100vw; height:auto; max-height:100vh; background:#000; object-fit:contain; outline:none; }
+    #start {
+      position:fixed; inset:0; z-index:2; display:grid; place-items:center;
+      border:0; padding:24px; background:rgba(0,0,0,.72); color:#fff;
+      font:600 18px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;
+      letter-spacing:.02em; cursor:pointer;
+    }
+    #start span { padding:14px 22px; border:1px solid rgba(255,255,255,.7); border-radius:8px; background:rgba(0,0,0,.35); }
+    #start:focus-visible span { outline:2px solid #fff; outline-offset:4px; }
+    #start.hidden { display:none; }
+  </style>
+<style>.pf-icon{display:inline-block;width:16px;height:16px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.page-flow .pf-icon,.shortcut .pf-icon{margin:0 4px}</style>
+<style>@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }</style>
+</head>
+<body>
+  <video id="intro" playsinline controls preload="metadata" aria-label="Reprodução de demonstração"><source src="assets/video/pobreflix-intro.mp4" type="video/mp4">
+    Seu navegador não suporta reprodução de vídeo HTML5.
+  </video>
+  <button id="start" type="button" aria-label="Clique para iniciar"><span>Clique para iniciar</span></button>
+  <script>
+    (() => {
+      const video = document.getElementById('intro');
+      const start = document.getElementById('start');
+      video.muted = false;
+      const begin = () => {
+        video.muted = false;
+        const p = video.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => start.classList.add('hidden')).catch(() => {});
+        } else {
+          start.classList.add('hidden');
+        }
+      };
+      start.addEventListener('click', begin, { once: true });
+      start.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); begin(); }
+      });
+      start.focus();
+    })();
+  </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/pobreflix.js"></script>
+</body>
+</html>

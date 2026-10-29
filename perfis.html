@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141414">
+  <title>Quem está assistindo? — POBREFLIX</title>
+  <style>
+    :root { color-scheme:dark; --bg:#141414; --red:#e50914; --muted:#9a9a9a; }
+    * { box-sizing:border-box; }
+    html,body { min-height:100%; margin:0; }
+    body { min-height:100vh; background:var(--bg); color:#f5f5f1; font-family:Arial,Helvetica,sans-serif; }
+    .brand { position:absolute; top:clamp(16px,3vh,28px); left:clamp(18px,3vw,42px); color:var(--red); font-family:Impact,"Arial Narrow",sans-serif; font-size:clamp(27px,3vw,40px); line-height:1; letter-spacing:.015em; text-decoration:none; text-shadow:0 0 1px var(--red); }
+    main { width:min(100% - 32px,1000px); min-height:calc(100vh - 80px); margin:0 auto; padding:clamp(112px,22vh,190px) 0 52px; text-align:center; }
+    h1 { margin:0; font-size:clamp(30px,4vw,54px); font-weight:400; letter-spacing:-.035em; }
+    .privacy-note { max-width:680px; margin:14px auto 0; color:#b8b8b8; font-size:.94rem; line-height:1.5; }
+    .profiles { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:clamp(10px,2.2vw,28px); width:min(100%,850px); margin:clamp(28px,5vh,52px) auto 0; }
+    .profile-item { min-width:0; }
+    .profile { display:flex; width:100%; min-width:0; flex-direction:column; align-items:center; border:0; padding:0; background:transparent; color:var(--muted); font:inherit; cursor:pointer; transition:color .15s ease,transform .15s ease; }
+    .profile:hover:not(:disabled) { color:#fff; transform:scale(1.045); }
+    .profile:focus-visible,.manage:focus-visible,.save:focus-visible,.cancel:focus-visible,.name-editor:focus-visible,.brand:focus-visible,footer a:focus-visible { outline:3px solid #fff; outline-offset:5px; }
+    .profile:disabled { cursor:default; opacity:.75; }
+    .avatar { --tile:min(15vw,148px); position:relative; display:block; width:min(100%,148px); aspect-ratio:1; overflow:hidden; border:2px solid rgba(255,255,255,.2); border-radius:2px; box-shadow:0 0 0 1px rgba(0,0,0,.3); }
+    .avatar::before { content:""; position:absolute; left:24%; top:28%; width:12%; height:12%; border-radius:50%; background:#f3ffff; box-shadow:calc(var(--tile)*.48) 0 0 #f3ffff; }
+    .avatar::after { content:""; position:absolute; left:24%; top:52%; width:52%; height:19%; border-bottom:clamp(3px,.42vw,6px) solid #f3ffff; border-radius:0 0 50% 50%; }
+    .blue { background:linear-gradient(145deg,#087fea,#0871c8 72%,#0055a5); }
+    .teal { background:linear-gradient(145deg,#00505d,#063b47 72%,#17343b); }
+    .red { background:linear-gradient(145deg,#fb1332,#e50914 72%,#b80017); }
+    .yellow { background:linear-gradient(145deg,#ffcf18,#f5b900 72%,#d99a00); }
+    .green { background:linear-gradient(145deg,#30d49a,#20b77c 72%,#178e67); }
+    .name { display:block; width:100%; margin-top:12px; overflow-wrap:anywhere; font-size:clamp(13px,1.6vw,19px); line-height:1.3; }
+    .profile[aria-pressed="true"] .avatar { border-color:#fff; box-shadow:0 0 0 2px var(--bg),0 0 0 4px #fff; }
+    .editors { display:grid; gap:12px; width:min(100%,520px); margin:30px auto 0; text-align:left; }
+    .editors[hidden] { display:none; }
+    .editor { display:grid; grid-template-columns:minmax(110px,1fr) minmax(150px,2fr); align-items:center; gap:12px; }
+    .editor label { color:#ddd; font-size:.93rem; }
+    .name-editor { width:100%; min-height:42px; padding:8px 10px; border:1px solid #666; border-radius:3px; background:#202020; color:#fff; font:inherit; }
+    .controls { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin-top:clamp(28px,6vh,58px); }
+    .manage,.save,.cancel { min-height:44px; padding:0 20px; border:1px solid #858585; border-radius:0; background:transparent; color:#ddd; font:inherit; font-size:.9rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
+    .manage:hover,.cancel:hover { border-color:#fff; color:#fff; }
+    .save { border-color:var(--red); background:var(--red); color:#fff; font-weight:700; }
+    .save:hover { border-color:#ff333d; background:#ff333d; }
+    .controls [hidden] { display:none; }
+    .status { min-height:1.5em; margin:18px auto 0; color:#e1e1e1; font-size:.94rem; }
+    footer { padding:18px 16px 26px; border-top:1px solid #292929; color:#999; text-align:center; font-size:.85rem; }
+    footer a { margin:0 8px; color:#ccc; text-decoration:none; }
+    footer a:hover { color:#fff; text-decoration:underline; }
+    @media(max-width:600px) { main { min-height:calc(100vh - 70px); padding-top:clamp(110px,18vh,150px); } .profiles { gap:8px; } .name { font-size:clamp(11px,3vw,15px); } .avatar { width:100%; } .editor { grid-template-columns:1fr; gap:5px; } .editors { padding:0 8px; } }
+    @media(max-height:560px) { main { padding-top:100px; } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; } }
+  </style>
+</head>
+<body>
+  <a class="brand" href="index.html" aria-label="Pobreflix — página inicial">POBREFLIX</a>
+  <main>
+    <h1>Quem está assistindo?</h1>
+    <p class="privacy-note">Escolha um perfil para abrir o catálogo. Estes perfis e nomes ficam somente neste navegador e dispositivo; não sincronizam com conta ou nuvem.</p>
+    <section class="profiles" id="profiles" aria-label="Perfis locais">
+      <div class="profile-item"><button class="profile" type="button" data-profile="amanda" aria-pressed="false"><span class="avatar blue" aria-hidden="true"></span><span class="name">Amanda</span></button></div>
+      <div class="profile-item"><button class="profile" type="button" data-profile="caio" aria-pressed="false"><span class="avatar teal" aria-hidden="true"></span><span class="name">Caio</span></button></div>
+      <div class="profile-item"><button class="profile" type="button" data-profile="bruna" aria-pressed="false"><span class="avatar red" aria-hidden="true"></span><span class="name">Bruna</span></button></div>
+      <div class="profile-item"><button class="profile" type="button" data-profile="lucas" aria-pressed="false"><span class="avatar yellow" aria-hidden="true"></span><span class="name">Lucas</span></button></div>
+      <div class="profile-item"><button class="profile" type="button" data-profile="larissa" aria-pressed="false"><span class="avatar green" aria-hidden="true"></span><span class="name">Larissa</span></button></div>
+    </section>
+    <form class="editors" id="editors" hidden aria-label="Editar nomes dos perfis">
+      <div class="editor"><label for="name-amanda">Nome do perfil 1</label><input class="name-editor" id="name-amanda" data-name="amanda" maxlength="24" required autocomplete="off"></div>
+      <div class="editor"><label for="name-caio">Nome do perfil 2</label><input class="name-editor" id="name-caio" data-name="caio" maxlength="24" required autocomplete="off"></div>
+      <div class="editor"><label for="name-bruna">Nome do perfil 3</label><input class="name-editor" id="name-bruna" data-name="bruna" maxlength="24" required autocomplete="off"></div>
+      <div class="editor"><label for="name-lucas">Nome do perfil 4</label><input class="name-editor" id="name-lucas" data-name="lucas" maxlength="24" required autocomplete="off"></div>
+      <div class="editor"><label for="name-larissa">Nome do perfil 5</label><input class="name-editor" id="name-larissa" data-name="larissa" maxlength="24" required autocomplete="off"></div>
+    </form>
+    <div class="controls" aria-label="Ações dos perfis">
+      <button class="manage" id="manageProfiles" type="button" aria-controls="editors" aria-expanded="false">Gerenciar perfis</button>
+      <button class="save" id="saveProfiles" type="submit" form="editors" hidden>Salvar nomes</button>
+      <button class="cancel" id="cancelEdit" type="button" hidden>Cancelar</button>
+    </div>
+    <p class="status" id="profileStatus" role="status" aria-live="polite"></p>
+  </main>
+  <footer aria-label="Links locais">
+    <a href="index.html">Início</a>
+    <a href="catalago.html">Catálogo</a>
+    <a href="central-ajuda.html">Ajuda</a>
+  </footer>
+  <script>
+    (function () {
+      'use strict';
+      const profilesKey = 'pobreflix.localProfiles';
+      const activeKey = 'pobreflix.activeProfile';
+      const defaults = [
+        { id: 'amanda', name: 'Amanda' },
+        { id: 'caio', name: 'Caio' },
+        { id: 'bruna', name: 'Bruna' },
+        { id: 'lucas', name: 'Lucas' },
+        { id: 'larissa', name: 'Larissa' }
+      ];
+      const status = document.getElementById('profileStatus');
+      const editorForm = document.getElementById('editors');
+      const manageButton = document.getElementById('manageProfiles');
+      const saveButton = document.getElementById('saveProfiles');
+      const cancelButton = document.getElementById('cancelEdit');
+      const profileButtons = Array.from(document.querySelectorAll('.profile'));
+      let profiles = defaults.map(function (item) { return { id: item.id, name: item.name }; });
+      let editing = false;
+
+      function loadProfiles() {
+        try {
+          const stored = JSON.parse(localStorage.getItem(profilesKey) || 'null');
+          if (Array.isArray(stored)) {
+            profiles = defaults.map(function (item) {
+              const saved = stored.find(function (entry) { return entry && entry.id === item.id; });
+              const name = saved && typeof saved.name === 'string' ? saved.name.trim().slice(0, 24) : '';
+              return { id: item.id, name: name || item.name };
+            });
+          }
+          return true;
+        } catch (_) {
+          profiles = defaults.map(function (item) { return { id: item.id, name: item.name }; });
+          return false;
+        }
+      }
+
+      function render() {
+        profileButtons.forEach(function (button) {
+          const item = profiles.find(function (profile) { return profile.id === button.dataset.profile; });
+          const name = item ? item.name : button.dataset.profile;
+          button.querySelector('.name').textContent = name;
+          button.setAttribute('aria-label', 'Selecionar perfil ' + name);
+          button.disabled = editing;
+        });
+        try {
+          const active = localStorage.getItem(activeKey);
+          profileButtons.forEach(function (button) {
+            button.setAttribute('aria-pressed', String(button.dataset.profile === active));
+          });
+        } catch (_) { /* armazenamento pode estar indisponível */ }
+      }
+
+      function setEditing(value) {
+        editing = value;
+        editorForm.hidden = !value;
+        saveButton.hidden = !value;
+        cancelButton.hidden = !value;
+        manageButton.hidden = value;
+        manageButton.setAttribute('aria-expanded', String(value));
+        profileButtons.forEach(function (button) { button.disabled = value; });
+        if (value) {
+          profiles.forEach(function (profile) {
+            const input = editorForm.querySelector('[data-name="' + profile.id + '"]');
+            input.value = profile.name;
+          });
+          editorForm.querySelector('input').focus();
+          status.textContent = 'Edite os nomes e salve. As alterações ficam apenas neste navegador e dispositivo.';
+        }
+      }
+
+      loadProfiles();
+      render();
+      manageButton.addEventListener('click', function () { setEditing(true); });
+      cancelButton.addEventListener('click', function () {
+        setEditing(false);
+        render();
+        status.textContent = 'Edição cancelada; os nomes salvos não foram alterados.';
+      });
+      editorForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const updated = [];
+        for (const profile of profiles) {
+          const input = editorForm.querySelector('[data-name="' + profile.id + '"]');
+          const name = input.value.trim();
+          if (!name) {
+            input.setCustomValidity('Digite um nome para este perfil.');
+            input.reportValidity();
+            input.addEventListener('input', function clearValidity() { input.setCustomValidity(''); input.removeEventListener('input', clearValidity); });
+            return;
+          }
+          updated.push({ id: profile.id, name: name.slice(0, 24) });
+        }
+        try {
+          localStorage.setItem(profilesKey, JSON.stringify(updated));
+          profiles = updated;
+          setEditing(false);
+          render();
+          status.textContent = 'Nomes salvos neste navegador e dispositivo. Eles não sincronizam com conta ou nuvem.';
+        } catch (_) {
+          status.textContent = 'Não foi possível salvar neste dispositivo. Verifique as permissões de armazenamento do navegador.';
+        }
+      });
+      profileButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          if (editing) return;
+          const item = profiles.find(function (profile) { return profile.id === button.dataset.profile; });
+          try {
+            localStorage.setItem(activeKey, button.dataset.profile);
+          } catch (_) {
+            status.textContent = 'Não foi possível salvar a seleção neste dispositivo; o catálogo não foi aberto.';
+            return;
+          }
+          render();
+          status.textContent = 'Perfil ' + (item ? item.name : '') + ' selecionado. Abrindo o catálogo.';
+          window.location.assign('catalago.html');
+        });
+      });
+    }());
+  </script>
+</body>
+</html>
